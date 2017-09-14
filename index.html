@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <title>Write messages to the devtool console</title>
+    <meta charset="utf-8"/>
+    <script src="scripts/scinum.js"></script>
+    <script src="scripts/notes.js"></script>
+    <link rel="stylesheet" href="styles.css">
+
+</head>
+<body>
+<section id="plotSettings">
+    <label for="aVal">a: </label>
+    value: <input type=number id="aVal" value=0 oninput="updateLabel();">
+    <p></p>
+    <label for="bVal">b: </label>
+    value: <input type=number id="bVal" value=0 oninput="updateLabel();">
+    <p></p>
+    <label for="cVal">c: </label>
+    value: <input type=number id="cVal" value=0 oninput="updateLabel();">
+
+    <p></p>
+
+    <label id="equation">ax + bx + c</label>
+
+    <p></p>
+    <button onclick="computeRoot();">compute it!</button>
+
+</section>
+<section id="answer">
+    <div id="result">
+
+    </div>
+</section>
+<section id="guesser">
+
+</section>
+</body>
+</html>
