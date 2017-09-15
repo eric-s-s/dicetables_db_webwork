@@ -1,6 +1,3 @@
-QUnit.test( "hello test", function( assert ) {
-    assert.ok( 1 == "1", "Passed!" );
-});
 
 QUnit.test("new scinum positive", function (assert) {
     var toTestStrs = new SciNum("+1.23", "+456");
@@ -36,42 +33,106 @@ QUnit.test("div neg power", function (assert) {
     assert.deepEqual(small.div(small), new SciNum(1, 0), "small over small")
 });
 
-QUnit.test("setting fixedSize", function (assert) {
+QUnit.test("mul pos power", function (assert) {
+    var big = new SciNum(2.00, 345);
+    var small = new SciNum(4.00, 123);
+    assert.deepEqual(big.mul(small), new SciNum(8, 468), "big times small");
+    assert.deepEqual(small.mul(big), new SciNum(8, 468), "small times big");
+    assert.deepEqual(small.mul(small), new SciNum(1.6, 247), "small times small")
+});
+
+QUnit.test("mul neg power", function (assert) {
+    var big = new SciNum(2.00, -345);
+    var small = new SciNum(-4.00, -123);
+    assert.deepEqual(big.mul(small), new SciNum(-8, -468), "big times small");
+    assert.deepEqual(small.mul(big), new SciNum(-8, -468), "small times big");
+    assert.deepEqual(small.mul(small), new SciNum(1.6, -245), "small times small")
+});
+
+QUnit.test("setting sigFigs", function (assert) {
     var tst = new SciNum(1, 2);
-    assert.deepEqual(tst.fixedSize, 4, "start fixedSize");
-    tst.fixedSize = 5;
-    assert.deepEqual(tst.fixedSize, 5, "new fixedSize");
+    assert.deepEqual(tst.sigFigs, 4, "start sigFigs");
+    tst.sigFigs = 5;
+    assert.deepEqual(tst.sigFigs, 5, "new sigFigs");
 });
 
 QUnit.test("toString no round", function (assert) {
     var tstPos = new SciNum(1.23, 456);
     var tstNeg = new SciNum(-1.23, -456);
-    assert.deepEqual(tstPos.toString(), "1.2300e+456", "pos mantissa, pos power");
-    assert.deepEqual(tstNeg.toString(), "-1.2300e-456", "neg mantissa, neg power");
+    assert.deepEqual(tstPos.toString(), "1.23e+456", "pos mantissa, pos power");
+    assert.deepEqual(tstNeg.toString(), "-1.23e-456", "neg mantissa, neg power");
 });
 
-QUnit.test("toString regular round", function (assert) {
-    var tstPos = new SciNum(1.23456, 456);
-    var tstNeg = new SciNum(-1.23456, -456);
-    assert.deepEqual(tstPos.toString(), "1.2346e+456", "pos mantissa, pos power");
-    assert.deepEqual(tstNeg.toString(), "-1.2346e-456", "neg mantissa, neg power");
+QUnit.test("toNum neg pos infinity", function (assert) {
+    assert.deepEqual(new SciNum(1, 350).toNum(), Infinity, "pos inf");
+    assert.deepEqual(new SciNum(-1, 350).toNum(), -Infinity, "neg inf");
 });
 
-QUnit.test("toString special round", function (assert) {
-    var tstPos = new SciNum(9.999951, 123);
-    var tstNeg = new SciNum(-9.999951, -123);
-    var tstToZero = new SciNum(-9.999951, -1);
-    assert.deepEqual(tstPos.toString(), "1.0000e+124", "pos mantissa, pos power");
-    assert.deepEqual(tstNeg.toString(), "-1.0000e-122", "neg mantissa, neg power");
-    assert.deepEqual(tstToZero.toString(), "-1.0000e+0", "round to zero power");
+QUnit.test("toNum 0", function (assert) {
+    assert.deepEqual(new SciNum(1, -350).toNum(), 0, "pos approach");
+    assert.deepEqual(new SciNum(-1, -350).toNum(), 0, "neg approach");
+    assert.deepEqual(new SciNum(0, 50).toNum(), 0, "zero mantissa");
 });
 
-QUnit.test("toString after setting fixedSize", function (assert) {
-    var tst = new SciNum(1.23456, 1);
-    tst.fixedSize = 5;
-    assert.deepEqual(tst.toString(), "1.23456e+1", "fixedSize 5");
-    tst.fixedSize = 3;
-    assert.deepEqual(tst.toString(), "1.235e+1", "fixedSize 3");
+QUnit.test("toNum neg powers", function (assert) {
+    assert.deepEqual(new SciNum(1.2, -50).toNum(), 1.2e-50, "pos ");
+    assert.deepEqual(new SciNum(-1.2, -50).toNum(), -1.2e-50, "neg ");
+});
+
+QUnit.test("toNum pos powers", function (assert) {
+    assert.deepEqual(new SciNum(1.2, 50).toNum(), 1.2e50, "pos ");
+    assert.deepEqual(new SciNum(-1.2, 50).toNum(), -1.2e50, "neg ");
+});
+
+QUnit.test("toFancyStr commaed", function (assert) {
+    assert.deepEqual(new SciNum(1.23456, 5).toFancyStr(), "123,456");
+    assert.deepEqual(new SciNum(1.23456, 3).toFancyStr(), "1,235");
+    assert.deepEqual(new SciNum(1.23456, 2).toFancyStr(), "123.5");
+});
+
+QUnit.test("toFancyStr commaed but rounds up", function (assert) {
+    assert.deepEqual(new SciNum(9.99999, 5).toFancyStr(), "999,999");
+    assert.deepEqual(new SciNum(9.999999, 5).toFancyStr(), "1.000e+6");
+    assert.deepEqual(new SciNum(9.99999, 3).toFancyStr(), "10,000");
+    assert.deepEqual(new SciNum(9.99999, 2).toFancyStr(), "1,000");
+    assert.deepEqual(new SciNum(9.99999, 1).toFancyStr(), "100.0");
+    assert.deepEqual(new SciNum(9.99999, 0).toFancyStr(), "10.00");
+    assert.deepEqual(new SciNum(9.99999, -1).toFancyStr(), "1.000");
+});
+
+QUnit.test("toFancyStr lt zero ", function (assert) {
+    assert.deepEqual(new SciNum(1.23456, -1).toFancyStr(), "0.1235");
+    assert.deepEqual(new SciNum(1.23456, -2).toFancyStr(), "0.01235");
+    assert.deepEqual(new SciNum(1.23456, -3).toFancyStr(), "0.001235");
+    assert.deepEqual(new SciNum(1.23456, -4).toFancyStr(), "1.235e-4");
+});
+
+QUnit.test("toFancyStr lt zero rounding", function (assert) {
+    assert.deepEqual(new SciNum(9.99999, -1).toFancyStr(), "1.000");
+    assert.deepEqual(new SciNum(9.99999, -2).toFancyStr(), "0.1000");
+    assert.deepEqual(new SciNum(9.99999, -3).toFancyStr(), "0.01000");
+    assert.deepEqual(new SciNum(9.99999, -4).toFancyStr(), "1.000e-3", " i'm a lazy bum and i won't fix this now.");
+});
+
+QUnit.test("toFancyStr large and small", function (assert) {
+    assert.deepEqual(new SciNum(1.23456, -10).toFancyStr(), "1.235e-10");
+    assert.deepEqual(new SciNum(1.23456, 10).toFancyStr(), "1.235e+10");
+    assert.deepEqual(new SciNum(1.23456, -1000).toFancyStr(), "1.235e-1000");
+    assert.deepEqual(new SciNum(1.23456, 1000).toFancyStr(), "1.235e+1000");
+});
+
+QUnit.test("toFancyStr large and small rounding", function (assert) {
+    assert.deepEqual(new SciNum(9.99999, -10).toFancyStr(), "1.000e-9");
+    assert.deepEqual(new SciNum(9.99999, 10).toFancyStr(), "1.000e+11");
+    assert.deepEqual(new SciNum(9.99999, -1000).toFancyStr(), "1.000e-999");
+    assert.deepEqual(new SciNum(9.99999, 1000).toFancyStr(), "1.000e+1001");
+});
+
+QUnit.test("toFancyStr large and small regression test", function (assert) {
+    assert.deepEqual(new SciNum(9.1, -10).toFancyStr(), "9.100e-10");
+    assert.deepEqual(new SciNum(9.1, 10).toFancyStr(), "9.100e+10");
+    assert.deepEqual(new SciNum(9.1, -1000).toFancyStr(), "9.100e-1000");
+    assert.deepEqual(new SciNum(9.1, 1000).toFancyStr(), "9.100e+1000");
 });
 
 function makeSNArray(numPairs) {
@@ -130,6 +191,11 @@ QUnit.test("sumSciNum multielements negative powers negative values", function (
     assert.deepEqual(sumSciNum(negNotOverTen), new SciNum(-1.23, -1), "sum not lt one");
     var negOverTen = makeSNArray([ [-9.9, -1], [-2, -2] , [-3, -3]]);
     assert.deepEqual(sumSciNum(negOverTen), new SciNum(-1.013, 0), "sum not lt one");
+});
+
+QUnit.test("sumSciNum regression test", function (assert) {
+    var ltOnegtZero = makeSNArray( [ [1, 3] , [2, 4]]);
+    assert.deepEqual(sumSciNum(ltOnegtZero), new SciNum(2.1, 4), "sum of mantissa lt one");
 });
 
 

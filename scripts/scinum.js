@@ -1,7 +1,7 @@
 function SciNum (mantissa, power) {
     this.mantissa = parseFloat(mantissa);
     this.power = parseInt(power);
-    this.fixedSize = 4;
+    this.sigFigs = 4;
     // this.add = function (other) {
     //     var maxPowDiff = 15;
     //     var powDiff = this.power - other.power;
@@ -30,16 +30,49 @@ function SciNum (mantissa, power) {
         }
         return new SciNum(newMantissa, newPow);
     };
-    this.toString = function () {
-        manStr = this.mantissa.toFixed(this.fixedSize);
-        powToUse = this.power;
-        if (manStr.search("10.") > -1) {
-            manStr = manStr.replace("10.", "1.");
-            powToUse += 1;
+    this.mul = function (other) {
+        var newMantissa = this.mantissa * other.mantissa;
+        var newPow = this.power + other.power;
+        if (Math.abs(newMantissa) >= 10){
+            newMantissa /= 10;
+            newPow += 1;
         }
-        return manStr + "e" + toSignedStr(powToUse);
+        return new SciNum(newMantissa, newPow);
+    };
+    this.toString = function () {
+        return this.mantissa.toString() + "e" + toSignedStr(this.power);
+    };
+    this.toNum = function () {
+        return parseFloat(this.toString());
+    };
+    this.toFancyStr = function () {
+        var commaedCutOff = 5;
+        var fixedCutoff = -3;
+        if (this.power <= commaedCutOff && this.power >= 0) {
+            var sigFigs = Math.max(this.sigFigs, this.power + 1);
+            answer = this.toNum().toLocaleString(
+                'en-US', {maximumSignificantDigits: sigFigs, minimumSignificantDigits: sigFigs}
+                );
+            var lenLimit = commaedCutOff + Math.floor(sigFigs / 3);
+            var intLen = answer.split(".")[0].length;
+            if (intLen > lenLimit) {
+                return this.toNum().toExponential(this.sigFigs - 1);
+            } else {
+                return answer;
+            }
+        } else if (this.power >= fixedCutoff && this.power < 0) {
+            return this.toNum().toPrecision(this.sigFigs);
+        } else {
+            manStr = this.mantissa.toFixed(this.sigFigs - 1);
+            powToUse = this.power;
+            if (manStr.indexOf("10.") === 0) {
+                manStr = manStr.replace("10.", "1.");
+                powToUse += 1;
+            }
+            return manStr + "e" + toSignedStr(powToUse);
+        }
 
-    }
+    };
 }
 
 function toSignedStr(num) {
