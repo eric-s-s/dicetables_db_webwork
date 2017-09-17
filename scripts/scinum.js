@@ -48,28 +48,33 @@ function SciNum (mantissa, power) {
     this.toFancyStr = function () {
         var commaedCutOff = 5;
         var fixedCutoff = -3;
+
+        function scientificNotation() {
+            var manStr = this.mantissa.toFixed(this.sigFigs - 1);
+            var powToUse = this.power;
+            if (manStr.indexOf("10.") === 0) {
+                manStr = manStr.replace("10.", "1.");
+                powToUse += 1;
+            }
+            return manStr + "e" + toSignedStr(powToUse);
+        }
+
         if (this.power <= commaedCutOff && this.power >= 0) {
             var sigFigs = Math.max(this.sigFigs, this.power + 1);
-            answer = this.toNum().toLocaleString(
+            var answer = this.toNum().toLocaleString(
                 'en-US', {maximumSignificantDigits: sigFigs, minimumSignificantDigits: sigFigs}
                 );
             var lenLimit = commaedCutOff + Math.floor(sigFigs / 3);
             var intLen = answer.split(".")[0].length;
             if (intLen > lenLimit) {
-                return this.toNum().toExponential(this.sigFigs - 1);
+                return scientificNotation.call(this);
             } else {
                 return answer;
             }
         } else if (this.power >= fixedCutoff && this.power < 0) {
             return this.toNum().toPrecision(this.sigFigs);
         } else {
-            manStr = this.mantissa.toFixed(this.sigFigs - 1);
-            powToUse = this.power;
-            if (manStr.indexOf("10.") === 0) {
-                manStr = manStr.replace("10.", "1.");
-                powToUse += 1;
-            }
-            return manStr + "e" + toSignedStr(powToUse);
+            return scientificNotation.call(this);
         }
 
     };

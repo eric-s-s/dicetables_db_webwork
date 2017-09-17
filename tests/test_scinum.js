@@ -193,9 +193,12 @@ QUnit.test("sumSciNum multielements negative powers negative values", function (
     assert.deepEqual(sumSciNum(negOverTen), new SciNum(-1.013, 0), "sum not lt one");
 });
 
-QUnit.test("sumSciNum regression test", function (assert) {
-    var ltOnegtZero = makeSNArray( [ [1, 3] , [2, 4]]);
-    assert.deepEqual(sumSciNum(ltOnegtZero), new SciNum(2.1, 4), "sum of mantissa lt one");
+QUnit.test("sumSciNum sum of mantissa lt one.", function (assert) {
+    var ltOnegtZero = makeSNArray( [ [0.1, 3] , [.02, 4]]);
+    var answer = sumSciNum(ltOnegtZero);
+
+    assert.deepEqual(answer.mantissa.toFixed(6), "3.000000", "float math means almost equal");
+    assert.deepEqual(answer.power, 2)
 });
 
 
