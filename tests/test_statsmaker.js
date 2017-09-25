@@ -15,15 +15,98 @@ QUnit.test("makeSciNumArray multiple elements", function (assert) {
     );
 });
 
-QUnit.test("makeStats positive poswers", function (assert) {
+QUnit.test("makeStats positive poswers commaed", function (assert) {
     var arrVals = makeSciNumArray([ [1, 4] , [2, 3]]);
     var total = new SciNum(2.4, 5);
     var expected = {total: "240,000", occurrences: "12,000", oneInChance: "20.00", pctChance: "5.000"};
     assert.deepEqual(
         getStatsObj(total, arrVals),
         expected,
-        "first try"
+        "all answers commaed notation"
     );
 });
+
+QUnit.test("makestats large numbers large chance", function (assert) {
+    var arrVals = makeSciNumArray([ [1, 0] , [1, 100]]);
+    var total = new SciNum(2.0000, 100);
+    var expected = {total: "2.000e+100", occurrences: "1.000e+100", oneInChance: "2.000", pctChance: "50.00"};
+    assert.deepEqual(
+        getStatsObj(total, arrVals),
+        expected,
+        "one element larger than others"
+    );
+});
+
+QUnit.test("makestats large numbers small chance", function (assert) {
+    var arrVals = makeSciNumArray([[4, 100], [1, 100]]);
+    var total = new SciNum(2.0000, 10000);
+    var expected = {
+        total: "2.000e+10000", occurrences: "5.000e+100",
+        oneInChance: "4.000e+9899", pctChance: "2.500e-9898"
+    };
+    assert.deepEqual(
+        getStatsObj(total, arrVals),
+        expected,
+        "total is much bigger."
+    );
+});
+
+QUnit.test("makestats very small numbers", function (assert) {
+    var total = new SciNum(1.000, -500);
+    var arrVals = makeSciNumArray([ [5.000, -502], [2.000, -501]]);
+    var expected = {
+        total: "1.000e-500", occurrences: "2.500e-501",
+        oneInChance: "4.000", pctChance: "25.00"
+    };
+    assert.deepEqual(
+        getStatsObj(total, arrVals),
+        expected
+    );
+});
+
+QUnit.test("makestats low positive powers", function (assert) {
+    var total = new SciNum(1.000, 2);
+    var arrVals = makeSciNumArray([ [5.0, 0], [1.5, 1]]);
+    var expected = {
+        total: "100.0", occurrences: "20.00",
+        oneInChance: "5.000", pctChance: "20.00"
+    };
+    assert.deepEqual(
+        getStatsObj(total, arrVals),
+        expected
+    );
+});
+
+QUnit.test("createSciNumObj", function (assert) {
+    var inputObj = {'1': ['1.23', '10'], '2': ['1.23', '11']};
+    var expected = {'1': new SciNum('1.23', '10'), 2: new SciNum('1.23', '11'),
+        'total': new SciNum(1.353, 11)};
+    assert.deepEqual(createSciNumObj(inputObj), expected);
+
+});
+
+QUnit.test("getSciNumValue obj has value", function (assert) {
+    toTest = new SciNum(1, 2);
+    var objUsingNum = {1: toTest};
+    var objUsingStr = {"1": toTest};
+    assert.deepEqual(getSciNumValue(objUsingNum, 1), toTest, "num key called with num");
+    assert.deepEqual(getSciNumValue(objUsingNum, '1'), toTest, "num key called with str");
+    assert.deepEqual(getSciNumValue(objUsingStr, 1), toTest, "str key called with num");
+    assert.deepEqual(getSciNumValue(objUsingStr, '1'), toTest, "str key called with str");
+
+});
+
+QUnit.test("getSciNumValue obj doesn't have value", function (assert) {
+    toTest = new SciNum(1, 2);
+    zeroSciNum = new SciNum(0, 0);
+    var objUsingNum = {1: toTest};
+    var objUsingStr = {"1": toTest};
+    assert.deepEqual(getSciNumValue(objUsingNum, 2), zeroSciNum, "num key called with num");
+    assert.deepEqual(getSciNumValue(objUsingNum, '2'), zeroSciNum, "num key called with str");
+    assert.deepEqual(getSciNumValue(objUsingStr, 2), zeroSciNum, "str key called with num");
+    assert.deepEqual(getSciNumValue(objUsingStr, '2'), zeroSciNum, "str key called with str");
+
+});
+
 
 

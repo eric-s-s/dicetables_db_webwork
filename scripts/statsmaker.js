@@ -3,7 +3,7 @@ function makeSciNumArray(strPairsArray){
 }
 
 function getStatsObj(total, sciNumArr){
-    var statsObj = new Object();
+    var statsObj = {};
     var arrSum = sumSciNum(sciNumArr);
     statsObj.occurrences = arrSum.toFancyStr();
     statsObj.oneInChance = total.div(arrSum).toFancyStr();
@@ -11,4 +11,28 @@ function getStatsObj(total, sciNumArr){
     statsObj.pctChance = pct.toFancyStr();
     statsObj.total = total.toFancyStr();
     return statsObj;
+}
+
+function createSciNumObj(rollMantissaPowerObj) {
+    var outObj = {};
+    var forTotal = [];
+    for (roll in rollMantissaPowerObj){
+        if (rollMantissaPowerObj.hasOwnProperty(roll)) {
+            var manPowArr = rollMantissaPowerObj[roll];
+            var number = new SciNum(manPowArr[0], manPowArr[1]);
+            outObj[roll] = number;
+            forTotal.push(number);
+        }
+    }
+    outObj["total"] = sumSciNum(forTotal);
+    return outObj;
+}
+
+function getStats(sciNumObj, numArr) {
+    var sciNumArr = numArr.map(function (t) { return getSciNumValue(sciNumObj, t); });
+    return getStatsObj(sciNumObj.total, sciNumArr);
+}
+
+function getSciNumValue(obj, key) {
+    return obj.hasOwnProperty(key) ? obj[key] : new SciNum(0, 0);
 }
