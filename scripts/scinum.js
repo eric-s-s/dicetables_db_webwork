@@ -49,14 +49,22 @@ function SciNum (mantissa, power) {
         var commaedCutOff = 5;
         var fixedCutoff = -3;
 
-        function scientificNotation() {
-            var manStr = this.mantissa.toFixed(this.sigFigs - 1);
-            var powToUse = this.power;
+        function scientificNotation(sciNumObj) {
+            var manStr = sciNumObj.mantissa.toFixed(sciNumObj.sigFigs - 1);
+            var powToUse = sciNumObj.power;
             if (manStr.indexOf("10.") === 0) {
                 manStr = manStr.replace("10.", "1.");
                 powToUse += 1;
             }
             return manStr + "e" + toSignedStr(powToUse);
+        }
+
+        if (this.mantissa === 0) {
+            return this.mantissa.toFixed(this.sigFigs - 1);
+        }
+
+        if (this.mantissa === Infinity || this.mantissa === -Infinity) {
+            return this.mantissa.toString();
         }
 
         if (this.power <= commaedCutOff && this.power >= 0) {
@@ -67,14 +75,14 @@ function SciNum (mantissa, power) {
             var lenLimit = commaedCutOff + Math.floor(sigFigs / 3);
             var intLen = answer.split(".")[0].length;
             if (intLen > lenLimit) {
-                return scientificNotation.call(this);
+                return scientificNotation(this);
             } else {
                 return answer;
             }
         } else if (this.power >= fixedCutoff && this.power < 0) {
             return this.toNum().toPrecision(this.sigFigs);
         } else {
-            return scientificNotation.call(this);
+            return scientificNotation(this);
         }
 
     };

@@ -84,6 +84,18 @@ QUnit.test("toNum pos powers", function (assert) {
     assert.deepEqual(new SciNum(-1.2, 50).toNum(), -1.2e50, "neg ");
 });
 
+QUnit.test('toFancyStr zero', function (assert) {
+    assert.deepEqual(new SciNum(0, 100).toFancyStr(), '0.000');
+    var changeSigFigs = new SciNum(0, 100);
+    changeSigFigs.sigFigs = 5;
+    assert.deepEqual(changeSigFigs.toFancyStr(), '0.0000');
+});
+
+QUnit.test('toFancyStr infinity', function (assert) {
+    assert.deepEqual(new SciNum(Infinity, 0).toFancyStr(), 'Infinity');
+    assert.deepEqual(new SciNum(-Infinity, 0).toFancyStr(), '-Infinity');
+});
+
 QUnit.test("toFancyStr commaed", function (assert) {
     assert.deepEqual(new SciNum(1.23456, 5).toFancyStr(), "123,456");
     assert.deepEqual(new SciNum(1.23456, 3).toFancyStr(), "1,235");
@@ -199,6 +211,13 @@ QUnit.test("sumSciNum sum of mantissa lt one.", function (assert) {
 
     assert.deepEqual(answer.mantissa.toFixed(6), "3.000000", "float math means almost equal");
     assert.deepEqual(answer.power, 2)
+});
+
+QUnit.test("sumSciNum zero values", function (assert) {
+    var zeroSum = makeSNArray( [ [0, 3] , [0, 4]]);
+    var answer = sumSciNum(zeroSum);
+
+    assert.deepEqual(answer, new SciNum(0, 4));
 });
 
 
