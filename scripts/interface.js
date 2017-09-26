@@ -17,12 +17,11 @@ var fakeAnswer = {
 $("document").ready(function() {
         var forStats = createSciNumObj(fakeAnswer.forSciNum);
 
-        var toPlot = document.getElementById('plotter');
 
         $("#doit").click(function () {
             console.log('clicked');
             $('#hi').text('oh yeah');
-            Plotly.plot(toPlot, [{
+            Plotly.plot('plotter', [{
                 x: fakeAnswer.data[0],
                 y: fakeAnswer.data[1]
             }], {
@@ -33,18 +32,43 @@ $("document").ready(function() {
         $("#basic").text('stddev: ' + 2 + '\nmean: ' + 3.5 + '\nrange: ' + [2, 8]);
         var left = $('#left');
         var right = $('#right');
-        left.change(function (){
+        $("#getStats").submit(function (event) {
             var queryArr = getRange(left.val(), right.val());
-            console.log(queryArr);
+            var startIndex = fakeAnswer.data[0].indexOf(queryArr[0]);
+            var stopIndex = fakeAnswer.data[0].indexOf(queryArr[queryArr.length - 1]);
+            var yVals = fakeAnswer.data[1].slice(startIndex, stopIndex + 1);
+            console.log(queryArr, yVals, startIndex, stopIndex);
             var answer = getStats(forStats, queryArr);
             $("#answer").text(JSON.stringify(answer));
+            var plotSpot = document.getElementById('plotter');
+            if (plotSpot.data.length > 1) {
+                Plotly.deleteTraces('plotter', [-1]);
+            }
+
+            if (startIndex !== 0) {
+                var beforeVal = (fakeAnswer.data[1][startIndex - 1] + fakeAnswer.data[1][startIndex]) / 2;
+                queryArr.unshift(queryArr[0] - 0.5);
+                yVals.unshift(beforeVal);
+            }
+            if (stopIndex !== fakeAnswer.data[1].length - 1){
+                var afterVal = (fakeAnswer.data[1][stopIndex + 1] + fakeAnswer.data[1][stopIndex]) / 2;
+                queryArr.push(queryArr[queryArr.length - 1] + 0.5);
+                yVals.push(afterVal);
+            }
+
+
+
+
+
+
+            var plotName = answer.pctChance + '%';
+            Plotly.plot('plotter', [
+                {x: queryArr, y: yVals, type:'scatter', mode: 'none', name: plotName, fill: 'tozeroy'}
+                ], {margin: {t:0}});
+            event.preventDefault();
+
         });
-        right.change(function (){
-            var queryArr = getRange(left.val(), right.val());
-            console.log(queryArr);
-            var answer = getStats(forStats, queryArr);
-            $("#answer").text(JSON.stringify(answer));
-        });
+
     }
 );
 
@@ -59,7 +83,7 @@ var getRange = function (left, right) {
         start = right;
         stop = left;
     }
-    for (var i = start; i <= stop; i++){
+    for (var i = parseInt(start); i <= stop; i++){
         out.push(i);
     }
     return out;
