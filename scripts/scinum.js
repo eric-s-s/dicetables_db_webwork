@@ -1,6 +1,7 @@
 function SciNum (mantissa, power) {
     this.mantissa = parseFloat(mantissa);
-    this.power = parseInt(power);
+    this.power = (this.mantissa === 0 || this.mantissa === Infinity || this.mantissa === -Infinity) ?
+        0 : parseFloat(power);
     this.sigFigs = 4;
     // this.add = function (other) {
     //     var maxPowDiff = 15;
@@ -64,7 +65,8 @@ function SciNum (mantissa, power) {
         }
 
         if (this.mantissa === Infinity || this.mantissa === -Infinity) {
-            return this.mantissa.toString();
+            var base = '\u221E';
+            return (this.mantissa > 0) ? '+' + base : '-' + base;
         }
 
         if (this.power <= commaedCutOff && this.power >= 0) {
@@ -99,13 +101,13 @@ function sumSciNum(sciNumArray) {
     var maxPowerDiff = 15;
     var newMantissa = 0;
     var arrayLen = sciNumArray.length;
-    for (var i=0; i < arrayLen; i++) {
-        var theNum = sciNumArray[i];
+    sciNumArray.forEach(function(theNum) {
         var powerDiff = maxPow - theNum.power;
-        if (powerDiff <= maxPowerDiff){
-            newMantissa += theNum.mantissa * Math.pow(10, -powerDiff);
-        }
-    }
+            if (powerDiff <= maxPowerDiff){
+                newMantissa += theNum.mantissa * Math.pow(10, -powerDiff);
+            }
+    });
+
     while (Math.abs(newMantissa) < 1 && newMantissa !== 0) {
         newMantissa *= 10;
         maxPow -= 1;

@@ -82,7 +82,7 @@ QUnit.test("createStatsObj zero value", function (assert) {
     var arrVals = makeSciNumArray([ [0, 0], [0, 1]]);
     var expected = {
         total: "100.0", occurrences: "0.000",
-        oneInChance: "Infinity", pctChance: "0.000"
+        oneInChance: "+\u221E", pctChance: "0.000"
     };
     assert.deepEqual(
         createStatsObj(total, arrVals),
@@ -143,7 +143,7 @@ QUnit.test("getStats arr is no keys in obj", function (assert) {
     var sciNumObj = {1: new SciNum(1, 1), 2: new SciNum(2, 1), 3: new SciNum(2, 1), total: new SciNum(5, 1)};
     var expected = {
         total: "50.00", occurrences: "0.000",
-        oneInChance: "Infinity", pctChance: "0.000"
+        oneInChance: "+\u221E", pctChance: "0.000"
     };
     assert.deepEqual(getStats(sciNumObj, [5 , 6, 7]), expected, "with str array");
     assert.deepEqual(getStats(sciNumObj, ['a', 'b']), expected, "with num array");
@@ -165,7 +165,7 @@ QUnit.test("getStats large numbers large occurrences", function (assert) {
         total: "5.000e+1000", occurrences: "3.000e+1000",
         oneInChance: "1.667", pctChance: "60.00"
     };
-    assert.deepEqual(getStats(sciNumObj, [0, 1, 2]), expected, "with str array");
+    assert.deepEqual(getStats(sciNumObj, [0, 1, 2]), expected);
 });
 
 QUnit.test("getStats large numbers small occurrences", function (assert) {
@@ -175,6 +175,6 @@ QUnit.test("getStats large numbers small occurrences", function (assert) {
         total: "2.000e+1000", occurrences: "30.00",
         oneInChance: "6.667e+998", pctChance: "1.500e-997"
     };
-    assert.deepEqual(getStats(sciNumObj, [0, 1, 2]), expected, "with str array");
+    assert.deepEqual(getStats(sciNumObj, [0, 1, 2]), expected);
 });
 

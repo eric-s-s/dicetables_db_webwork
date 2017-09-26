@@ -17,6 +17,25 @@ QUnit.test("new scinum negative", function (assert) {
     assert.deepEqual(toTestNums.power, -456, "power int ok");
 });
 
+QUnit.test("new SciNum zero value always has zero power", function (assert) {
+    var zero = new SciNum(0, 100);
+    assert.deepEqual(zero.power, 0, "power is zero");
+    assert.deepEqual(zero, new SciNum(0, -5), "zero values evaluate to same");
+});
+
+QUnit.test("new SciNum +/-inf mantissa has zero power", function (assert) {
+    var negInf = new SciNum(-Infinity, 100);
+    assert.deepEqual(negInf.power, 0, "power is zero for neg inf");
+    assert.deepEqual(negInf, new SciNum(-Infinity, -100), "neg inf all equal");
+
+    var posInf = new SciNum(Infinity, 100);
+    assert.deepEqual(posInf.power, 0, "power is zero for neg inf");
+    assert.deepEqual(posInf, new SciNum(Infinity, -100), "neg inf all equal");
+
+    assert.notDeepEqual(posInf, negInf, "pos and neg inf are not equal");
+
+});
+
 QUnit.test("div pos power", function (assert) {
     var big = new SciNum(2.00, 345);
     var small = new SciNum(4.00, 123);
@@ -92,8 +111,8 @@ QUnit.test('toFancyStr zero', function (assert) {
 });
 
 QUnit.test('toFancyStr infinity', function (assert) {
-    assert.deepEqual(new SciNum(Infinity, 0).toFancyStr(), 'Infinity');
-    assert.deepEqual(new SciNum(-Infinity, 0).toFancyStr(), '-Infinity');
+    assert.deepEqual(new SciNum(Infinity, 0).toFancyStr(), '+\u221E', 'infinity \u221E');
+    assert.deepEqual(new SciNum(-Infinity, 0).toFancyStr(), '-\u221E', 'neg inf \u221E');
 });
 
 QUnit.test("toFancyStr commaed", function (assert) {
@@ -217,7 +236,7 @@ QUnit.test("sumSciNum zero values", function (assert) {
     var zeroSum = makeSNArray( [ [0, 3] , [0, 4]]);
     var answer = sumSciNum(zeroSum);
 
-    assert.deepEqual(answer, new SciNum(0, 4));
+    assert.deepEqual(answer, new SciNum(0, 0));
 });
 
 
