@@ -149,6 +149,15 @@ QUnit.test("getStats arr is no keys in obj", function (assert) {
     assert.deepEqual(getStats(sciNumObj, ['a', 'b']), expected, "with num array");
 });
 
+QUnit.test("getStats arr is empty", function (assert) {
+    var sciNumObj = {1: new SciNum(1, 1), 2: new SciNum(2, 1), 3: new SciNum(2, 1), total: new SciNum(5, 1)};
+    var expected = {
+        total: "50.00", occurrences: "0.000",
+        oneInChance: "+\u221E", pctChance: "0.000"
+    };
+    assert.deepEqual(getStats(sciNumObj, []), expected);
+});
+
 QUnit.test("getStats arr is some keys in obj.", function (assert) {
     var sciNumObj = {1: new SciNum(1, 1), 2: new SciNum(2, 1), 3: new SciNum(2, 1), total: new SciNum(5, 1)};
     var expected = {

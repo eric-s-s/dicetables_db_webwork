@@ -239,6 +239,11 @@ QUnit.test("sumSciNum zero values", function (assert) {
     assert.deepEqual(answer, new SciNum(0, 0));
 });
 
+QUnit.test("sumSciNum empty arr", function (assert) {
+    var answer = sumSciNum([]);
+    assert.deepEqual(answer, new SciNum(0, 0));
+});
+
 
 
 

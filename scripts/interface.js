@@ -1,43 +1,50 @@
-var fakeAnswer = {
-    'original': [[2, 3, 4, 5, 6, 7, 8], [1, 2, 3, 4, 3, 2, 1]],
-    'data': [[2, 3, 4, 5, 6, 7, 8], [6.25, 12.5, 18.75, 25.0, 18.75, 12.5, 6.25]],
-    'tableString': "2: 1\n3: 2\n4: 3\n5: 4\n6: 3\n7: 2\n8: 1\n",
-    'forSciNum': {'2': ['1.00000', '0'],
-        '3': ['2.00000', '0'],
-        '4': ['3.00000', '0'],
-        '5': ['4.00000', '0'],
-        '6': ['3.00000', '0'],
-        '7': ['2.00000', '0'],
-        '8': ['1.00000', '0']},
-    'stddev': 2,
-    'mean': 3.5,
-    'range': [2, 8]
 
-};
+
+
 $("document").ready(function() {
-        var forStats = createSciNumObj(fakeAnswer.forSciNum);
+        var forStats = createSciNumObj(fakeAnswer1.forSciNum);
 
-
-        $("#doit").click(function () {
-            console.log('clicked');
-            $('#hi').text('oh yeah');
-            Plotly.plot('plotter', [{
-                x: fakeAnswer.data[0],
-                y: fakeAnswer.data[1]
+        Plotly.plot('plotter', [{
+                x: fakeAnswer1.data[0],
+                y: fakeAnswer1.data[1]
             }], {
-                margin: {t: 10}
+                margin: {t: 10}// , xaxis: {fixedrange: true}, yaxis: {fixedrange: true}
             });
-        });
 
-        $("#basic").text('stddev: ' + 2 + '\nmean: ' + 3.5 + '\nrange: ' + [2, 8]);
+        $("#basic").text('stddev: ' + fakeAnswer1.stddev + '\nmean: ' + fakeAnswer1.mean + '\nrange: ' + fakeAnswer1.range);
         var left = $('#left');
         var right = $('#right');
+        $(".tableEnquiry").submit(function (event){
+            event.preventDefault();
+            console.log(this.id)
+        });
+
+
+        $('#more').click(function () {
+            var useArea = $('#enquiryArea');
+            var newForm = $("<form></form>");
+            var rmButton = $("<button type='button'>rm</button>");
+            var inputTxt = $("<input type=\"text\" name=\"bob\" title=\"get table\"/>");
+            var submitButton = $("<button type='submit'>submit</button>");
+            newForm.append([rmButton, inputTxt, submitButton]);
+            useArea.append(newForm);
+            rmButton.on('click', function () {
+                $(this).parent().remove();
+                console.log(useArea);
+            });
+            newForm.submit(function (event) {
+                event.preventDefault();
+                console.log($(this).children('[name="bob"]')[0].value);
+            })
+        });
+
+
+
         $("#getStats").submit(function (event) {
             var queryArr = getRange(left.val(), right.val());
-            var startIndex = fakeAnswer.data[0].indexOf(queryArr[0]);
-            var stopIndex = fakeAnswer.data[0].indexOf(queryArr[queryArr.length - 1]);
-            var yVals = fakeAnswer.data[1].slice(startIndex, stopIndex + 1);
-            console.log(queryArr, yVals, startIndex, stopIndex);
+            var startIndex = fakeAnswer1.data[0].indexOf(queryArr[0]);
+            var stopIndex = fakeAnswer1.data[0].indexOf(queryArr[queryArr.length - 1]);
+            var yVals = fakeAnswer1.data[1].slice(startIndex, stopIndex + 1);
             var answer = getStats(forStats, queryArr);
             $("#answer").text(JSON.stringify(answer));
             var plotSpot = document.getElementById('plotter');
@@ -46,25 +53,22 @@ $("document").ready(function() {
             }
 
             if (startIndex !== 0) {
-                var beforeVal = (fakeAnswer.data[1][startIndex - 1] + fakeAnswer.data[1][startIndex]) / 2;
+                var beforeVal = (fakeAnswer1.data[1][startIndex - 1] + fakeAnswer1.data[1][startIndex]) / 2;
                 queryArr.unshift(queryArr[0] - 0.5);
                 yVals.unshift(beforeVal);
             }
-            if (stopIndex !== fakeAnswer.data[1].length - 1){
-                var afterVal = (fakeAnswer.data[1][stopIndex + 1] + fakeAnswer.data[1][stopIndex]) / 2;
+            if (stopIndex !== fakeAnswer1.data[1].length - 1){
+                var afterVal = (fakeAnswer1.data[1][stopIndex + 1] + fakeAnswer1.data[1][stopIndex]) / 2;
                 queryArr.push(queryArr[queryArr.length - 1] + 0.5);
                 yVals.push(afterVal);
             }
 
 
-
-
-
-
             var plotName = answer.pctChance + '%';
-            Plotly.plot('plotter', [
+            Plotly.addTraces('plotter', [
                 {x: queryArr, y: yVals, type:'scatter', mode: 'none', name: plotName, fill: 'tozeroy'}
-                ], {margin: {t:0}});
+                ]);
+
             event.preventDefault();
 
         });
@@ -74,16 +78,18 @@ $("document").ready(function() {
 
 
 var getRange = function (left, right) {
+    var leftInt = parseInt(left);
+    var rightInt = parseInt(right);
     var out = [];
     var stop, start;
-    if (left < right) {
-        start = left;
-        stop = right;
+    if (leftInt < rightInt) {
+        start = leftInt;
+        stop = rightInt;
     } else {
-        start = right;
-        stop = left;
+        start = rightInt;
+        stop = leftInt;
     }
-    for (var i = parseInt(start); i <= stop; i++){
+    for (var i = start; i <= stop; i++){
         out.push(i);
     }
     return out;
