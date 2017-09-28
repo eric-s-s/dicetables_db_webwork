@@ -1,15 +1,30 @@
 var colors = [
-    '#1f77b4',  // muted blue
-    '#ff7f0e',  // safety orange
-    '#2ca02c',  // cooked asparagus green
-    '#d62728',  // brick red
-    '#9467bd',  // muted purple
-    '#8c564b',  // chestnut brown
-    '#e377c2',  // raspberry yogurt pink
-    '#7f7f7f',  // middle gray
-    '#bcbd22',  // curry yellow-green
-    '#17becf'   // blue-teal
+    '#1f77b4',  // muted blue  rgba(31,119,180, 1)
+    '#ff7f0e',  // safety orange  rgba(255,127,14, 1)
+    '#2ca02c',  // cooked asparagus green  rgba(44,160,44, 1)
+    '#d62728',  // brick red  rgba(214,39,40, 1)
+    '#9467bd',  // muted purple  rgba(148,103,189, 1)
+    '#8c564b',  // chestnut brown  rgba(140,86,75, 1)
+    '#e377c2',  // raspberry yogurt pink  rgba(227,119,194, 1)
+    '#7f7f7f',  // middle gray  rgba(127,127,127, 1)
+    '#bcbd22',  // curry yellow-green  rgba(188,189,34, 1)
+    '#17becf'  // blue-teal  rgba(23,190,207, 1)
 ];
+
+var colorsRGBA = [
+    'rgba(31,119,180, 0.5)',
+    'rgba(255,127,14, 0.5)',
+    'rgba(44,160,44, 0.5)',
+    'rgba(214,39,40, 0.5)',
+    'rgba(148,103,189, 0.5)',
+    'rgba(140,86,75, 0.5)',
+    'rgba(227,119,194, 0.5)',
+    'rgba(127,127,127, 0.5)',
+    'rgba(188,189,34, 0.5)',
+    'rgba(23,190,207, 0.5)'
+];
+
+
 
 
 var fakeAnswer1 = {
@@ -130,3 +145,7 @@ var fakeAnswer4 = {
     "mean": 9.5,
     "stddev": 2.6615
 };
+
+
+var fakeList = [fakeAnswer1, fakeAnswer2, fakeAnswer3, fakeAnswer4];
+
