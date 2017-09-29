@@ -1,32 +1,19 @@
 
 $("document").ready(function() {
 
+    $('#enquiryArea').data('hiddenTables', []);
 
+    var allTableForms = $('.tableEnquiry');
 
-    var currentTables = {};
-
-    var tableIDs = [];
-    for (var i = 0; i <10; i++) {tableIDs.push('table-' + i);}
-    $('#enquiryArea').data('hiddenTables', tableIDs);
-
-    tableIDs.forEach(function (el) {
-        $('#' + el).data('tableObj', null);
-        $('#' + el).hide();
+    allTableForms.submit(function (event) {
+        event.preventDefault();
+        getTable(this);
     });
-
-
+    allTableForms.data('tableObj', null);
+    allTableForms.each(function () {hideTableForm(this.id);});
 
     showTableForm();
     getTable($('#table-0')[0]);
-
-
-    $(".tableEnquiry").submit(function (event) {
-        event.preventDefault();
-        getTable(this);
-
-    });
-
-
 
     $('#more').click(function () {
             showTableForm();
