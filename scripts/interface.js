@@ -31,35 +31,6 @@ $("document").ready(function() {
 
     $("#basic").text('stddev: ' + fakeAnswer1.stddev + '\nmean: ' + fakeAnswer1.mean + '\nrange: ' + fakeAnswer1.range);
     $("#getStats").submit(function (event) {
-        // var forStats = createSciNumObj(fakeAnswer1.forSciNum);
-        // var queryArr = getRange(this.left.value, this.right.value);
-        // var startIndex = fakeAnswer1.data[0].indexOf(queryArr[0]);
-        // var stopIndex = fakeAnswer1.data[0].indexOf(queryArr[queryArr.length - 1]);
-        // var yVals = fakeAnswer1.data[1].slice(startIndex, stopIndex + 1);
-        // var answer = getStats(forStats, queryArr);
-        // $("#answer").text(JSON.stringify(answer));
-        // var plotSpot = document.getElementById('plotter');
-        // if (plotSpot.data.length > 1) {
-        //     Plotly.deleteTraces('plotter', [-1]);
-        // }
-        //
-        // if (startIndex !== 0) {
-        //     var beforeVal = (fakeAnswer1.data[1][startIndex - 1] + fakeAnswer1.data[1][startIndex]) / 2;
-        //     queryArr.unshift(queryArr[0] - 0.5);
-        //     yVals.unshift(beforeVal);
-        // }
-        // if (stopIndex !== fakeAnswer1.data[1].length - 1) {
-        //     var afterVal = (fakeAnswer1.data[1][stopIndex + 1] + fakeAnswer1.data[1][stopIndex]) / 2;
-        //     queryArr.push(queryArr[queryArr.length - 1] + 0.5);
-        //     yVals.push(afterVal);
-        // }
-        //
-        //
-        // var plotName = answer.pctChance + '%';
-        // Plotly.addTraces('plotter', [
-        //     {x: queryArr, y: yVals, type: 'scatter', mode: 'none', name: plotName, fill: 'tozeroy', fillcolor: "rgba(255,127,14,0.5)"}
-        // ]);
-        // console.log(plotSpot.data);
         event.preventDefault();
         plotStats(this);
     });
@@ -81,7 +52,6 @@ function showTableForm() {
         var idStr = tableIDs.shift();
         $('#' + idStr).show();
         currentTables[idStr] = undefined;
-        console.log(currentTables);
     }
 }
 
@@ -104,6 +74,20 @@ function plotCurrentTables () {
     }
     var graphDiv = document.getElementById('plotter');
     Plotly.newPlot(graphDiv, plotData, {margin: {t: 1}});
+    getRangesForStats();
+}
+
+function getRangesForStats() {
+    var data = document.getElementById('plotter').data;
+    var min = Infinity;
+    var max = -Infinity;
+    data.forEach(function (el) {
+        var xVals = el.x;
+        min = Math.min(min, xVals[0]);
+        max = Math.max(max, xVals[xVals.length - 1]);
+    });
+    if (min === Infinity || max === -Infinity) {min = 0; max = 0;}
+    $('.statsInput').attr({'min': min, 'value': min, 'max': max});
 }
 
 function getTable(formObj) {
@@ -135,10 +119,8 @@ function plotStats(statsForm) {
             var stop = Math.min(queryArr[queryArr.length - 1], tableObj.range[1]);
             var startIndex = tableObj.data[0].indexOf(start);
             var stopIndex = tableObj.data[0].indexOf(stop);
-            console.log('start, stop', start, stop, 'indices', startIndex, stopIndex);
             var xVals = tableObj.data[0].slice(startIndex, stopIndex + 1);
             var yVals = tableObj.data[1].slice(startIndex, stopIndex + 1);
-            console.log('x, y', xVals, yVals);
             if (start > tableObj.range[0]) {
                 var beforeVal = (tableObj.data[1][startIndex - 1] + tableObj.data[1][startIndex]) / 2;
                 xVals.unshift(start - 0.5);
@@ -152,7 +134,7 @@ function plotStats(statsForm) {
 
             var forStats = createSciNumObj(tableObj.forSciNum);
             var answer = getStats(forStats, queryArr);
-            var plotName = answer.pctChance + '%';
+            var plotName = graphDiv.data[index].name + ': ' + answer.pctChance + '%';
 
             allAnswers += (JSON.stringify(answer) + '\n');
 
@@ -161,36 +143,7 @@ function plotStats(statsForm) {
         }
     }
     Plotly.addTraces(graphDiv, statsData);
-    console.log(allAnswers);
     $("#answer").text(allAnswers);
-    // var forStats = createSciNumObj(fakeAnswer1.forSciNum);
-    // var startIndex = fakeAnswer1.data[0].indexOf(queryArr[0]);
-    // var stopIndex = fakeAnswer1.data[0].indexOf(queryArr[queryArr.length - 1]);
-    // var yVals = fakeAnswer1.data[1].slice(startIndex, stopIndex + 1);
-    // var answer = getStats(forStats, queryArr);
-    // $("#answer").text(JSON.stringify(answer));
-    // var plotSpot = document.getElementById('plotter');
-    // if (plotSpot.data.length > 1) {
-    //     Plotly.deleteTraces('plotter', [-1]);
-    // }
-    //
-    // if (startIndex !== 0) {
-    //     var beforeVal = (fakeAnswer1.data[1][startIndex - 1] + fakeAnswer1.data[1][startIndex]) / 2;
-    //     queryArr.unshift(queryArr[0] - 0.5);
-    //     yVals.unshift(beforeVal);
-    // }
-    // if (stopIndex !== fakeAnswer1.data[1].length - 1) {
-    //     var afterVal = (fakeAnswer1.data[1][stopIndex + 1] + fakeAnswer1.data[1][stopIndex]) / 2;
-    //     queryArr.push(queryArr[queryArr.length - 1] + 0.5);
-    //     yVals.push(afterVal);
-    // }
-    //
-    //
-    // var plotName = answer.pctChance + '%';
-    // Plotly.addTraces('plotter', [
-    //     {x: queryArr, y: yVals, type: 'scatter', mode: 'none', name: plotName, fill: 'tozeroy', fillcolor: "rgba(255,127,14,0.5)"}
-    // ]);
-    // console.log(plotSpot.data);
 }
 
 var getRange = function (left, right) {
