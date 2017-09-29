@@ -1,17 +1,20 @@
 
-
-
-var currentTables = {};
-var tableIDs = [];
-for (var i = 0; i <10; i++) {tableIDs.push('table-' + i);}
-
 $("document").ready(function() {
 
 
 
-    tableIDs.forEach(function (id) {
-        $('#' + id).hide();
+    var currentTables = {};
+
+    var tableIDs = [];
+    for (var i = 0; i <10; i++) {tableIDs.push('table-' + i);}
+    $('#enquiryArea').data('hiddenTables', tableIDs);
+
+    tableIDs.forEach(function (el) {
+        $('#' + el).data('tableObj', null);
+        $('#' + el).hide();
     });
+
+
 
     showTableForm();
     getTable($('#table-0')[0]);
@@ -40,38 +43,37 @@ $("document").ready(function() {
 function hideTableForm(idStr) {
     var theForm = $('#' + idStr);
     theForm.hide();
+    theForm.data('tableObj', null);
     theForm[0].reset();
-    tableIDs.push(idStr);
-    tableIDs.sort();
-    delete currentTables[idStr];
+    var hiddenTables = $('#enquiryArea').data('hiddenTables');
+    hiddenTables.push(idStr);
+    hiddenTables.sort();
     plotCurrentTables();
 }
 
 function showTableForm() {
-    if (tableIDs.length > 0) {
-        var idStr = tableIDs.shift();
+    var hiddentTables = $('#enquiryArea').data('hiddenTables');
+    if (hiddentTables.length > 0) {
+        var idStr = hiddentTables.shift();
         $('#' + idStr).show();
-        currentTables[idStr] = undefined;
     }
 }
 
 
 
 function plotCurrentTables () {
-    var plotOrder = Object.keys(currentTables);
-    plotOrder.sort();
     var plotData = [];
-    for (var i = 0; i < plotOrder.length; i++) {
-        var dataObj = currentTables[plotOrder[i]];
-        if (dataObj !== undefined) {
+    $('.tableEnquiry').each( function () {
+        var tableObj = $('#' + this.id).data('tableObj');
+        if (tableObj !== null) {
             var datum = {
-                x: dataObj.data[0],
-                y: dataObj.data[1],
-                name: dataObj.repr.slice("<DiceTable containing ".length, -1)
+                x: tableObj.data[0],
+                y: tableObj.data[1],
+                name: tableObj.repr.slice("<DiceTable containing ".length, -1)
             };
             plotData.push(datum);
         }
-    }
+    });
     var graphDiv = document.getElementById('plotter');
     Plotly.newPlot(graphDiv, plotData, {margin: {t: 1}});
     getRangesForStats();
@@ -92,7 +94,7 @@ function getRangesForStats() {
 
 function getTable(formObj) {
     var index = formObj.tableQuery.value % fakeList.length;
-    currentTables[formObj.id] = fakeList[index];
+    $('#' + formObj.id).data('tableObj', fakeList[index]);
     plotCurrentTables();
 }
 
@@ -109,12 +111,11 @@ function plotStats(statsForm) {
 
     var statsData = [];
     var allAnswers = '';
+    var nonNullDataIndex = 0;
 
-    var plotOrder = Object.keys(currentTables);
-    plotOrder.sort();
-    for (var index = 0; index < plotOrder.length; index++){
-        var tableObj = currentTables[plotOrder[index]];
-        if (tableObj !== undefined) {
+    $('.tableEnquiry').each(function () {
+        var tableObj = $('#' + this.id).data('tableObj');
+        if (tableObj !== null) {
             var start = Math.max(queryArr[0], tableObj.range[0]);
             var stop = Math.min(queryArr[queryArr.length - 1], tableObj.range[1]);
             var startIndex = tableObj.data[0].indexOf(start);
@@ -134,14 +135,17 @@ function plotStats(statsForm) {
 
             var forStats = createSciNumObj(tableObj.forSciNum);
             var answer = getStats(forStats, queryArr);
-            var plotName = graphDiv.data[index].name + ': ' + answer.pctChance + '%';
+            var plotName = graphDiv.data[nonNullDataIndex].name + ': ' + answer.pctChance + '%';
 
             allAnswers += (JSON.stringify(answer) + '\n');
 
-            var traceDatum = {x: xVals, y: yVals, type: 'scatter', mode: 'none', name: plotName, fill: 'tozeroy', fillcolor: colorsRGBA[index]};
+            var traceDatum = {x: xVals, y: yVals, type: 'scatter', mode: 'none', name: plotName, fill: 'tozeroy', fillcolor: colorsRGBA[nonNullDataIndex]};
             statsData.push(traceDatum);
+
+            nonNullDataIndex++;
         }
-    }
+    });
+
     Plotly.addTraces(graphDiv, statsData);
     $("#answer").text(allAnswers);
 }
@@ -166,6 +170,8 @@ var getRange = function (left, right) {
 
 function countPlottedTables() {
     var count = 0;
-    Object.values(currentTables).forEach(function (el) {if (el !== undefined) {count++;}});
+    $('.tableEnquiry').each(function () {
+        if ($("#" + this.id).data('tableObj') !== null) {count++;}
+    });
     return count;
 }

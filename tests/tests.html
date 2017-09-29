@@ -13,12 +13,24 @@
 </head>
 <body>
 <div id="qunit"></div>
-<div id="qunit-fixture"></div>
+
+<div id="qunit-fixture">
+        <!-- everything in here is reset before each test -->
+        <form>
+            <input id='userid' type='text'>
+            <input id='login-btn' type='submit'>
+        </form>
+
+</div>
+
 <script src="https://code.jquery.com/qunit/qunit-2.4.0.js"></script>
 <script src="../scripts/scinum.js"></script>
 <script src="../scripts/statsmaker.js"></script>
 <script src="../scripts/fakedata.js"></script>
-<script src="../scripts/interface.js"></script>
+
+<!--use a copy of page in qunit fixture that'll reset it-->
+<!--<script src="../scripts/interface.js"></script>-->
+
 <script src="test_scinum.js"></script>
 <script src="test_statsmaker.js"></script>
 </body>
