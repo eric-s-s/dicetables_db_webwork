@@ -1,8 +1,6 @@
 
 $("document").ready(function() {
 
-
-
     var allTableForms = $('.tableRequest');
     var allStatsForms = $('.statsRequest');
     var tableRequestArea = $('#tableRequestArea');
@@ -13,11 +11,11 @@ $("document").ready(function() {
         getTable(this);
     });
     allTableForms.data('tableObj', null);
+
     allStatsForms.submit(function (event) {
         event.preventDefault();
         plotStats(this);
     });
-
 
     setUpHiddenForms(statRequestArea, allStatsForms);
     setUpHiddenForms(tableRequestArea, allTableForms);
@@ -112,9 +110,9 @@ function getRangesForStats() {
     $('.statsInput').attr({'min': min, 'value': min, 'max': max});
 }
 
-function getTable(formObj) {
-    var index = formObj.tableQuery.value % fakeList.length;
-    $('#' + formObj.id).data('tableObj', fakeList[index]);
+function getTable(tableForm) {
+    var index = tableForm.tableQuery.value % fakeList.length;
+    $('#' + tableForm.id).data('tableObj', fakeList[index]);
     plotCurrentTables();
 }
 
