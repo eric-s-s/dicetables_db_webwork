@@ -4,49 +4,73 @@ $("document").ready(function() {
 
 
     var allTableForms = $('.tableRequest');
+    var allStatsForms = $('.statsRequest');
+    var tableRequestArea = $('#tableRequestArea');
+    var statRequestArea = $('#statsRequestArea');
 
     allTableForms.submit(function (event) {
         event.preventDefault();
         getTable(this);
     });
     allTableForms.data('tableObj', null);
-    var hiddenTables = [];
-    allTableForms.each(function () {
-        $(this).hide();
-        hiddenTables.push(this.id)
-    });
-    hiddenTables.sort();
-
-    $('#enquiryArea').data('hiddenTables', hiddenTables);
-
-    var idStr = showTableForm();
-    getTable(document.getElementById(idStr));
-
-    $('#more').click(function () {
-            showTableForm();
-    });
-
-    $("#basic").text('stddev: ' + fakeAnswer1.stddev + '\nmean: ' + fakeAnswer1.mean + '\nrange: ' + fakeAnswer1.range);
-    $("#stats-1").submit(function (event) {
+    allStatsForms.submit(function (event) {
         event.preventDefault();
         plotStats(this);
     });
+
+
+    setUpHiddenForms(statRequestArea, allStatsForms);
+    setUpHiddenForms(tableRequestArea, allTableForms);
+
+    var idStr = showHiddenForm(tableRequestArea);
+    getTable(document.getElementById(idStr));
+
+    showHiddenForm(statRequestArea);
+
+    $('#more').click(function () {showHiddenForm(tableRequestArea);});
+    $('#moreStats').click(function () {showHiddenForm(statRequestArea);});
+
+    $('.rmStats').click(function () {hideStatsForm(this.parentNode.id);});
+
+    $('.rmTable').click(function () {hideTableForm(this.parentNode.id);});
+
+    $("#basic").text('stddev: ' + fakeAnswer1.stddev + '\nmean: ' + fakeAnswer1.mean + '\nrange: ' + fakeAnswer1.range);
+
 });
 
+function setUpHiddenForms(containerJQuery, classJQuery) {
+    var hiddenForms = [];
+    classJQuery.each(function () {
+        $(this).hide();
+        hiddenForms.push(this.id);
+    });
+    hiddenForms.sort();
+    containerJQuery.data('hiddenForms', hiddenForms);
+}
 
 function hideTableForm(idStr) {
     var theForm = $('#' + idStr);
     theForm.hide();
     theForm.data('tableObj', null);
     theForm[0].reset();
-    var hiddenTables = $('#enquiryArea').data('hiddenTables');
-    hiddenTables.push(idStr);
-    hiddenTables.sort();
+    var hiddenForms = $('#tableRequestArea').data('hiddenForms');
+    hiddenForms.push(idStr);
+    hiddenForms.sort();
     plotCurrentTables();
 }
 
-function showTableForm() {
-    var hiddentTables = $('#enquiryArea').data('hiddenTables');
+function hideStatsForm(idStr) {
+    var theForm = $('#' + idStr);
+    theForm.hide();
+    theForm[0].reset();
+    var hiddenForms = $('#statsRequestArea').data('hiddenForms');
+    hiddenForms.push(idStr);
+    hiddenForms.sort();
+    removeStatsTraces(idStr);
+}
+
+function showHiddenForm(requestAreaJQuery) {
+    var hiddentTables = requestAreaJQuery.data('hiddenForms');
     if (hiddentTables.length > 0) {
         var idStr = hiddentTables.shift();
         $('#' + idStr).show();
@@ -97,7 +121,7 @@ function getTable(formObj) {
 
 
 function plotStats(statsForm) {
-    removeStatsTraces(statsForm);
+    removeStatsTraces(statsForm.id);
     var graphDiv = document.getElementById('plotter');
 
     var queryArr = getRange(statsForm.left.value, statsForm.right.value);
@@ -132,11 +156,11 @@ function plotStats(statsForm) {
 }
 
 
-function removeStatsTraces(statsForm) {
+function removeStatsTraces(statsFormId) {
     var graphDiv = document.getElementById('plotter');
     var toRemove = [];
     for (var i = 0; i < graphDiv.data.length; i++) {
-        if (graphDiv.data[i].statsGroup === statsForm.id) {
+        if (graphDiv.data[i].statsGroup === statsFormId) {
             toRemove.push(i);
         }
     }

@@ -18,56 +18,56 @@
 </head>
 <body>
 <section id="plots">
-    <div id="enquiryArea">
+    <div id="tableRequestArea">
         <button id="more">more</button>
 
         <form class="tableRequest" id="table-0">
-            <button type="button" onclick="hideTableForm(this.parentNode.id)">rm</button>
+            <button type="button" class="rmTable">rm</button>
             <input type="text" name="tableQuery" title="get table" value="0">
             <button type="submit">submit</button>
         </form>
         <form class="tableRequest" id="table-1">
-            <button type="button" onclick="hideTableForm(this.parentNode.id)">rm</button>
+            <button type="button" class="rmTable">rm</button>
             <input type="text" name="tableQuery" title="get table" value="1">
             <button type="submit">submit</button>
         </form>
         <form class="tableRequest" id="table-2">
-            <button type="button" onclick="hideTableForm(this.parentNode.id)">rm</button>
+            <button type="button" class="rmTable">rm</button>
             <input type="text" name="tableQuery" title="get table" value="2">
             <button type="submit">submit</button>
         </form>
         <form class="tableRequest" id="table-3">
-            <button type="button" onclick="hideTableForm(this.parentNode.id)">rm</button>
+            <button type="button" class="rmTable">rm</button>
             <input type="text" name="tableQuery" title="get table" value="3">
             <button type="submit">submit</button>
         </form>
         <form class="tableRequest" id="table-4">
-            <button type="button" onclick="hideTableForm(this.parentNode.id)">rm</button>
+            <button type="button" class="rmTable">rm</button>
             <input type="text" name="tableQuery" title="get table" value="4">
             <button type="submit">submit</button>
         </form>
         <form class="tableRequest" id="table-5">
-            <button type="button" onclick="hideTableForm(this.parentNode.id)">rm</button>
+            <button type="button" class="rmTable">rm</button>
             <input type="text" name="tableQuery" title="get table" value="5">
             <button type="submit">submit</button>
         </form>
         <form class="tableRequest" id="table-6">
-            <button type="button" onclick="hideTableForm(this.parentNode.id)">rm</button>
+            <button type="button" class="rmTable">rm</button>
             <input type="text" name="tableQuery" title="get table" value="6">
             <button type="submit">submit</button>
         </form>
         <form class="tableRequest" id="table-7">
-            <button type="button" onclick="hideTableForm(this.parentNode.id)">rm</button>
+            <button type="button" class="rmTable">rm</button>
             <input type="text" name="tableQuery" title="get table" value="7">
             <button type="submit">submit</button>
         </form>
         <form class="tableRequest" id="table-8">
-            <button type="button" onclick="hideTableForm(this.parentNode.id)">rm</button>
+            <button type="button" class="rmTable">rm</button>
             <input type="text" name="tableQuery" title="get table" value="8">
             <button type="submit">submit</button>
         </form>
         <form class="tableRequest" id="table-9">
-            <button type="button" onclick="hideTableForm(this.parentNode.id)">rm</button>
+            <button type="button" class="rmTable">rm</button>
             <input type="text" name="tableQuery" title="get table" value="9">
             <button type="submit">submit</button>
         </form>
@@ -82,13 +82,81 @@
 </section>
 <section id="stats">
     <div id="basic"></div>
-    <div id="choose"></div>
 
-    <form id="stats-1" class="statsRequest">
-        <input class='statsInput' title='stats range' name='left' type="number">
-        <input class='statsInput' title='stats range' name='right' type="number">
-        <button type="submit">submit</button>
-    </form>
+    <div id="statsRequestArea">
+        <button id="moreStats">more stats</button>
+
+
+        <form id="stats-0" class="statsRequest">
+            <button class="rmStats" type="button" >rm</button>
+            <input class='statsInput' title='stats range' name='left' type="number">
+            <input class='statsInput' title='stats range' name='right' type="number">
+            <button type="submit">submit</button>
+        </form>
+
+        <form id="stats-1" class="statsRequest">
+            <button class="rmStats" type="button" >rm</button>
+            <input class='statsInput' title='stats range' name='left' type="number">
+            <input class='statsInput' title='stats range' name='right' type="number">
+            <button type="submit">submit</button>
+        </form>
+
+        <form id="stats-2" class="statsRequest">
+            <button class="rmStats" type="button" >rm</button>
+            <input class='statsInput' title='stats range' name='left' type="number">
+            <input class='statsInput' title='stats range' name='right' type="number">
+            <button type="submit">submit</button>
+        </form>
+
+        <form id="stats-3" class="statsRequest">
+            <button class="rmStats" type="button" >rm</button>
+            <input class='statsInput' title='stats range' name='left' type="number">
+            <input class='statsInput' title='stats range' name='right' type="number">
+            <button type="submit">submit</button>
+        </form>
+
+        <form id="stats-4" class="statsRequest">
+            <button class="rmStats" type="button" >rm</button>
+            <input class='statsInput' title='stats range' name='left' type="number">
+            <input class='statsInput' title='stats range' name='right' type="number">
+            <button type="submit">submit</button>
+        </form>
+
+        <form id="stats-5" class="statsRequest">
+            <button class="rmStats" type="button" >rm</button>
+            <input class='statsInput' title='stats range' name='left' type="number">
+            <input class='statsInput' title='stats range' name='right' type="number">
+            <button type="submit">submit</button>
+        </form>
+
+        <form id="stats-6" class="statsRequest">
+            <button class="rmStats" type="button" >rm</button>
+            <input class='statsInput' title='stats range' name='left' type="number">
+            <input class='statsInput' title='stats range' name='right' type="number">
+            <button type="submit">submit</button>
+        </form>
+
+        <form id="stats-7" class="statsRequest">
+            <button class="rmStats" type="button" >rm</button>
+            <input class='statsInput' title='stats range' name='left' type="number">
+            <input class='statsInput' title='stats range' name='right' type="number">
+            <button type="submit">submit</button>
+        </form>
+
+        <form id="stats-8" class="statsRequest">
+            <button class="rmStats" type="button" >rm</button>
+            <input class='statsInput' title='stats range' name='left' type="number">
+            <input class='statsInput' title='stats range' name='right' type="number">
+            <button type="submit">submit</button>
+        </form>
+
+        <form id="stats-9" class="statsRequest">
+            <button class="rmStats" type="button" >rm</button>
+            <input class='statsInput' title='stats range' name='left' type="number">
+            <input class='statsInput' title='stats range' name='right' type="number">
+            <button type="submit">submit</button>
+        </form>
+    </div>
 
 </section>
 <section id="answer">
