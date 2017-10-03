@@ -29,6 +29,11 @@
                 <input type="text" name="tableQuery" title="get table" value="1">
                 <button type="submit">submit</button>
             </form>
+            <form class="tableRequest" id="table-2">
+                <button type="button" class="rmTable">rm</button>
+                <input type="text" name="tableQuery" title="get table" value="1">
+                <button type="submit">submit</button>
+            </form>
         </div>
         <div id="plotter" style="width:600px;height:250px;"></div>
         <p id="hi">hmmm</p>
@@ -48,6 +53,13 @@
             </form>
 
             <form id="stats-1" class="statsRequest">
+                <button class="rmStats" type="button" >rm</button>
+                <input class='statsInput' title='stats range' name='left' type="number">
+                <input class='statsInput' title='stats range' name='right' type="number">
+                <button type="submit">submit</button>
+            </form>
+
+            <form id="stats-2" class="statsRequest">
                 <button class="rmStats" type="button" >rm</button>
                 <input class='statsInput' title='stats range' name='left' type="number">
                 <input class='statsInput' title='stats range' name='right' type="number">

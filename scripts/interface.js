@@ -1,6 +1,7 @@
 
-$("document").ready(function() {
+$(onPageLoad);
 
+function onPageLoad() {
     var allTableForms = $('.tableRequest');
     var allStatsForms = $('.statsRequest');
     var tableRequestArea = $('#tableRequestArea');
@@ -33,8 +34,7 @@ $("document").ready(function() {
     $('.rmTable').click(function () {hideTableForm(this.parentNode.id);});
 
     $("#basic").text('stddev: ' + fakeAnswer1.stddev + '\nmean: ' + fakeAnswer1.mean + '\nrange: ' + fakeAnswer1.range);
-
-});
+}
 
 function setUpHiddenForms(containerJQuery, classJQuery) {
     var hiddenForms = [];
@@ -44,6 +44,12 @@ function setUpHiddenForms(containerJQuery, classJQuery) {
     });
     hiddenForms.sort();
     containerJQuery.data('hiddenForms', hiddenForms);
+}
+
+function getTable(tableForm) {
+    var index = tableForm.tableQuery.value % fakeList.length;
+    $('#' + tableForm.id).data('tableObj', fakeList[index]);
+    plotCurrentTables();
 }
 
 function hideTableForm(idStr) {
@@ -77,8 +83,6 @@ function showHiddenForm(requestAreaJQuery) {
     return null;
 }
 
-
-
 function plotCurrentTables () {
     var plotData = [];
     $('.tableRequest').each( function () {
@@ -109,14 +113,6 @@ function getRangesForStats() {
     if (min === Infinity || max === -Infinity) {min = 0; max = 0;}
     $('.statsInput').attr({'min': min, 'value': min, 'max': max});
 }
-
-function getTable(tableForm) {
-    var index = tableForm.tableQuery.value % fakeList.length;
-    $('#' + tableForm.id).data('tableObj', fakeList[index]);
-    plotCurrentTables();
-}
-
-
 
 function plotStats(statsForm) {
     removeStatsTraces(statsForm.id);
