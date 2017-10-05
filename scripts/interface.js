@@ -107,8 +107,10 @@ function getRangesForStats() {
     var max = -Infinity;
     data.forEach(function (el) {
         var xVals = el.x;
-        min = Math.min(min, xVals[0]);
-        max = Math.max(max, xVals[xVals.length - 1]);
+        var elMin = Math.min.apply(null, xVals);
+        var elMax = Math.max.apply(null, xVals);
+        min = Math.min(min, elMin);
+        max = Math.max(max, elMax);
     });
     if (min === Infinity || max === -Infinity) {min = 0; max = 0;}
     $('.statsInput').attr({'min': min, 'value': min, 'max': max});
