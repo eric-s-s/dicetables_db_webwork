@@ -340,26 +340,73 @@ QUnit.test('getRange', function (assert) {
     assert.deepEqual(getRange('-1', '1'), [-1, 0, 1], 'negative to positive');
 });
 
+QUnit.test('statsGraphVals', function (assert) {
+    var tableObj = {"repr": "<DiceTable containing [1D4  W:10]>",
+        "data": [[1, 2, 3, 4], [10.0, 20.0, 50.0, 20.0]],
+        "tableString": "1: 1\n2: 2\n3: 5\n4: 2\n",
+        "forSciNum": {"1": ["1.00000", "0"], "2": ["2.00000", "0"], "3": ["5.00000", "0"], "4": ["2.00000", "0"]},
+        "range": [1, 4],
+        "mean": 2.8,
+        "stddev": 0.8718};
+
+    var expected = {x: [1, 2, 3, 4], y: [10.0, 20.0, 50.0, 20.0], type: 'scatter', mode: 'none', fill: 'tozeroy'};
+
+    var toTest = statsGraphVals([1, 2, 3, 4], tableObj);
+    assert.deepEqual(toTest, expected, 'all x vals');
+
+    expected.x = [1.52, 2, 3, 4];
+    expected.y = [(10*0.48 + 20*0.52), 20.0, 50.0, 20.0];
+    toTest = statsGraphVals([2, 3, 4], tableObj);
+    assert.deepEqual(toTest, expected, 'query vals higher than min.');
+
+    expected.x = [1, 2, 3, 3.48];
+    expected.y = [10.0, 20.0, 50.0, (50 * 0.52 + 20.0 * 0.48)];
+    toTest = statsGraphVals([1, 2, 3], tableObj);
+    assert.deepEqual(toTest, expected, 'query vals lower than max.');
+
+    expected.x = [2.52, 3, 3.48];
+    expected.y = [(20 * 0.48 + 50 * 0.52), 50.0, (50 * 0.52 + 20.0 * 0.48)];
+    toTest = statsGraphVals([3], tableObj);
+    assert.deepEqual(toTest, expected, 'query vals singleton in middle.');
+
+    expected.x = [1, 1.48];
+    expected.y = [10.0, (10 * 0.52 + 20.0 * 0.48)];
+    toTest = statsGraphVals([1], tableObj);
+    assert.deepEqual(toTest, expected, 'query vals singleton at end.');
+
+
+});
 
 // TODO
-// function statsGraphVals(queryArr, tableObj) {
-//     var start = Math.max(queryArr[0], tableObj.range[0]);
-//     var stop = Math.min(queryArr[queryArr.length - 1], tableObj.range[1]);
-//     var startIndex = tableObj.data[0].indexOf(start);
-//     var stopIndex = tableObj.data[0].indexOf(stop);
-//     var xVals = tableObj.data[0].slice(startIndex, stopIndex + 1);
-//     var yVals = tableObj.data[1].slice(startIndex, stopIndex + 1);
-//     if (start > tableObj.range[0]) {
-//         var beforeVal = (tableObj.data[1][startIndex - 1] + tableObj.data[1][startIndex]) / 2;
-//         xVals.unshift(start - 0.5);
-//         yVals.unshift(beforeVal);
-//     }
-//     if (stop < tableObj.range[1]) {
-//         var afterVal = (tableObj.data[1][stopIndex + 1] + tableObj.data[1][stopIndex]) / 2;
-//         xVals.push(stop + 0.5);
-//         yVals.push(afterVal);
-//     }
-//     return {x: xVals, y: yVals, type: 'scatter', mode: 'none', fill: 'tozeroy'};
+// function statsGraphName(tableObj, pctString, queryArr) {
+//     var tableName = tableObj.repr.slice("<DiceTable containing ".length, -1);
+//     var query = (queryArr.length === 1) ? queryArr[0]: queryArr[0] + '-' + queryArr[queryArr.length - 1];
+//     return tableName + ': ' + query + '=' + pctString + '%';
+// }
+
+// TODO
+// function statsGraphColor(matchGraphIndex, statsFormId) {
+//     var colorObjs = [
+//         {'r': 31, 'g': 119, 'b': 180, 'a': 0.5},
+//         {'r': 255, 'g': 127, 'b': 14, 'a': 0.5},
+//         {'r': 44, 'g': 160, 'b': 44, 'a': 0.5},
+//         {'r': 214, 'g': 39, 'b': 40, 'a': 0.5},
+//         {'r': 148, 'g': 103, 'b': 189, 'a': 0.5},
+//         {'r': 140, 'g': 86, 'b': 75, 'a': 0.5},
+//         {'r': 227, 'g': 119, 'b': 194, 'a': 0.5},
+//         {'r': 127, 'g': 127, 'b': 127, 'a': 0.5},
+//         {'r': 188, 'g': 189, 'b': 34, 'a': 0.5},
+//         {'r': 23, 'g': 190, 'b': 207, 'a': 0.5}
+//     ];
+//     var rgbaObj = colorObjs[matchGraphIndex];
+//     var modValues = [
+//         [0, -10, 10], [10, 10, 10], [-10, -10, -10], [-10, 10, -10], [10, -10, 10], [-10, -10, 10],
+//         [10, -10, -10], [-10, 10, 10], [10, 10, -10], [10, 0, -10], [-10, 0, 10], [0, 10, -10]
+//     ];
+//     var mod = modValues[statsFormId.slice(-1)];
+//     console.log(mod);
+//
+//     return 'rgba(' + (rgbaObj.r + mod[0]) + ',' + (rgbaObj.g + mod[1]) + ',' + (rgbaObj.b + mod[2]) +',0.5)';
 // }
 
 

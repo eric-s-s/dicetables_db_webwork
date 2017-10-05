@@ -134,10 +134,9 @@ function plotStats(statsForm) {
             var answer = getStats(forStats, queryArr);
 
             var traceDatum = statsGraphVals(queryArr, tableObj);
-            traceDatum['name'] = graphDiv.data[nonNullDataIndex].name + ': ' + answer.pctChance + '%';
-            var rgbaObj = colorObjs[nonNullDataIndex];
+            traceDatum['name'] = statsGraphName(tableObj, answer.pctChance, queryArr);
 
-            traceDatum['fillcolor'] = 'rgba(' + (rgbaObj.r) + ',' + (rgbaObj.g) + ',' + (rgbaObj.b) +',0.5)';
+            traceDatum['fillcolor'] = statsGraphColor(nonNullDataIndex, statsForm.id);
             traceDatum['statsGroup'] = statsForm.id;
             nonNullDataIndex++;
 
@@ -191,14 +190,44 @@ function statsGraphVals(queryArr, tableObj) {
     var xVals = tableObj.data[0].slice(startIndex, stopIndex + 1);
     var yVals = tableObj.data[1].slice(startIndex, stopIndex + 1);
     if (start > tableObj.range[0]) {
-        var beforeVal = (tableObj.data[1][startIndex - 1] + tableObj.data[1][startIndex]) / 2;
-        xVals.unshift(start - 0.5);
+        var beforeVal = 0.48 * tableObj.data[1][startIndex - 1] + 0.52 * tableObj.data[1][startIndex];
+        xVals.unshift(start - 0.48);
         yVals.unshift(beforeVal);
     }
     if (stop < tableObj.range[1]) {
-        var afterVal = (tableObj.data[1][stopIndex + 1] + tableObj.data[1][stopIndex]) / 2;
-        xVals.push(stop + 0.5);
+        var afterVal = 0.48 * tableObj.data[1][stopIndex + 1] + 0.52 * tableObj.data[1][stopIndex];
+        xVals.push(stop + 0.48);
         yVals.push(afterVal);
     }
     return {x: xVals, y: yVals, type: 'scatter', mode: 'none', fill: 'tozeroy'};
+}
+
+function statsGraphName(tableObj, pctString, queryArr) {
+    var tableName = tableObj.repr.slice("<DiceTable containing ".length, -1);
+    var query = (queryArr.length === 1) ? queryArr[0]: queryArr[0] + '-' + queryArr[queryArr.length - 1];
+    return tableName + ': ' + query + '=' + pctString + '%';
+}
+
+function statsGraphColor(matchGraphIndex, statsFormId) {
+    var colorObjs = [
+        {'r': 31, 'g': 119, 'b': 180, 'a': 0.5},
+        {'r': 255, 'g': 127, 'b': 14, 'a': 0.5},
+        {'r': 44, 'g': 160, 'b': 44, 'a': 0.5},
+        {'r': 214, 'g': 39, 'b': 40, 'a': 0.5},
+        {'r': 148, 'g': 103, 'b': 189, 'a': 0.5},
+        {'r': 140, 'g': 86, 'b': 75, 'a': 0.5},
+        {'r': 227, 'g': 119, 'b': 194, 'a': 0.5},
+        {'r': 127, 'g': 127, 'b': 127, 'a': 0.5},
+        {'r': 188, 'g': 189, 'b': 34, 'a': 0.5},
+        {'r': 23, 'g': 190, 'b': 207, 'a': 0.5}
+    ];
+    var rgbaObj = colorObjs[matchGraphIndex];
+    var modValues = [
+        [0, -10, 10], [10, 10, 10], [-10, -10, -10], [-10, 10, -10], [10, -10, 10], [-10, -10, 10],
+        [10, -10, -10], [-10, 10, 10], [10, 10, -10], [10, 0, -10], [-10, 0, 10], [0, 10, -10]
+    ];
+    var mod = modValues[statsFormId.slice(-1)];
+    console.log(mod);
+
+    return 'rgba(' + (rgbaObj.r + mod[0]) + ',' + (rgbaObj.g + mod[1]) + ',' + (rgbaObj.b + mod[2]) +',0.5)';
 }
