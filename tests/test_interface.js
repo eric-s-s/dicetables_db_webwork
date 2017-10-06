@@ -101,6 +101,7 @@ function initTest() {
     $(".tableRequest").data('tableObj', null);
     $('#tableRequestArea').data('hiddenForms', []);
     $('#statsRequestArea').data('hiddenForms', []);
+    Plotly.newPlot(document.getElementById('plotter'), [{x: [1], y: [1]}])
 }
 
 QUnit.test('plotCurrentTables no tables have data', function (assert) {
@@ -265,6 +266,20 @@ QUnit.test('hideTableForm test all actions', function (assert) {
 
 });
 
+QUnit.test('removeStatsTraces no presence in data.', function (assert) {
+    initTest();
+    var graphDiv = document.getElementById('plotter');
+    var beforeData = graphDiv.data;
+    Plotly.newPlot(graphDiv, [{x:[2], y:[2]}]);
+    var afterData = graphDiv.data;
+    assert.notDeepEqual(beforeData, afterData, 'confirm that data can change');
+
+    beforeData = graphDiv.data;
+    removeStatsTraces('random');
+    afterData = graphDiv.data;
+    assert.deepEqual(beforeData, afterData);
+
+});
 
 QUnit.test('removeStatsTraces removes traces. relies on special "statsGroup" value', function (assert) {
     initTest();
@@ -349,7 +364,8 @@ QUnit.test('statsGraphVals', function (assert) {
         "mean": 2.8,
         "stddev": 0.8718};
 
-    var expected = {x: [1, 2, 3, 4], y: [10.0, 20.0, 50.0, 20.0], type: 'scatter', mode: 'none', fill: 'tozeroy'};
+    var expected = {x: [1, 2, 3, 4], y: [10.0, 20.0, 50.0, 20.0], type: 'scatter', mode: 'none', fill: 'tozeroy',
+                    hoverinfo: 'skip'};
 
     var toTest = statsGraphVals([1, 2, 3, 4], tableObj);
     assert.deepEqual(toTest, expected, 'all x vals');
@@ -377,39 +393,55 @@ QUnit.test('statsGraphVals', function (assert) {
 
 });
 
-// TODO
-// function statsGraphName(tableObj, pctString, queryArr) {
-//     var tableName = tableObj.repr.slice("<DiceTable containing ".length, -1);
-//     var query = (queryArr.length === 1) ? queryArr[0]: queryArr[0] + '-' + queryArr[queryArr.length - 1];
-//     return tableName + ': ' + query + '=' + pctString + '%';
-// }
+QUnit.test('statsGraphName tableObj has set name, pctString is any str and queryArr is in order', function (assert) {
+    var tableObj = {'repr': '<DiceTable containing [1D4  W:3, 2D6]>'};
+    assert.equal(statsGraphName(tableObj, '1.23e-10', [2]), '[1D4  W:3, 2D6]: [2]: 1.23e-10%',
+        'single query. pct str in number range');
+    assert.equal(statsGraphName(tableObj, '1.23e-1000', [2]), '[1D4  W:3, 2D6]: [2]: 1.23e-1000%',
+        'single query. pct str not in number range');
+    assert.equal(statsGraphName(tableObj, '1.23e-1000', [2, 3, 4]), '[1D4  W:3, 2D6]: [2to4]: 1.23e-1000%',
+        'multi query.');
+    assert.equal(statsGraphName(tableObj, '1.23e-1000', [-4, -3, -2]), '[1D4  W:3, 2D6]: [-4to-2]: 1.23e-1000%',
+        'multi query with negative numbers.');
+});
 
-// TODO
-// function statsGraphColor(matchGraphIndex, statsFormId) {
-//     var colorObjs = [
-//         {'r': 31, 'g': 119, 'b': 180, 'a': 0.5},
-//         {'r': 255, 'g': 127, 'b': 14, 'a': 0.5},
-//         {'r': 44, 'g': 160, 'b': 44, 'a': 0.5},
-//         {'r': 214, 'g': 39, 'b': 40, 'a': 0.5},
-//         {'r': 148, 'g': 103, 'b': 189, 'a': 0.5},
-//         {'r': 140, 'g': 86, 'b': 75, 'a': 0.5},
-//         {'r': 227, 'g': 119, 'b': 194, 'a': 0.5},
-//         {'r': 127, 'g': 127, 'b': 127, 'a': 0.5},
-//         {'r': 188, 'g': 189, 'b': 34, 'a': 0.5},
-//         {'r': 23, 'g': 190, 'b': 207, 'a': 0.5}
-//     ];
-//     var rgbaObj = colorObjs[matchGraphIndex];
-//     var modValues = [
-//         [0, -10, 10], [10, 10, 10], [-10, -10, -10], [-10, 10, -10], [10, -10, 10], [-10, -10, 10],
-//         [10, -10, -10], [-10, 10, 10], [10, 10, -10], [10, 0, -10], [-10, 0, 10], [0, 10, -10]
-//     ];
-//     var mod = modValues[statsFormId.slice(-1)];
-//     console.log(mod);
-//
-//     return 'rgba(' + (rgbaObj.r + mod[0]) + ',' + (rgbaObj.g + mod[1]) + ',' + (rgbaObj.b + mod[2]) +',0.5)';
-// }
+QUnit.test('statsGraphColor relies on the final digit of statsFormId and where graph is in index', function (assert) {
+    assert.equal(statsGraphColor(0, 'randomStuff-1'), 'rgba(41,129,190,0.5)', 'index 0 ending in 1');
+    assert.equal(statsGraphColor(1, 'randomStuff-9'), 'rgba(265,127,4,0.5)', 'index 1 ending in 9');
+    var allDifferent = [];
+    for (var endDigit = 0; endDigit < 10; endDigit++){allDifferent.push(statsGraphColor(0, 'words-' + endDigit));}
+    for (var i=0; i < 10; i++){
+        for (var j=i+1; j < 10; j++){
+            assert.notEqual(statsGraphColor(0, 'words-' + i), statsGraphColor(0, 'words-' + j),
+                'color vals different for different form IDs')
+        }
+    }
+});
 
+QUnit.test('plotStats no tables contain tableObj so no change to graph data.', function (assert) {
+    initTest();
+    var graphDiv = document.getElementById('plotter');
+    var beforeData = graphDiv.data;
+    var stats0 = document.getElementById('stats-0');
+    stats0.left.value = 5;
+    stats0.right.value = 10;
 
+    plotStats(stats0);
+    var afterData = graphDiv.data;
+
+    assert.deepEqual(beforeData, afterData);
+});
+
+QUnit.test('plotStats', function (assert) {
+    initTest();
+    var table0 = $('#table-0');
+    var table2 = $("#table-2");
+    table0.data('tableObj', fakeAnswer1);
+    table2.data('tableObj', fakeAnswer2);
+
+    
+
+});
 // TODO
 // function plotStats(statsForm) {
 //     removeStatsTraces(statsForm.id);
@@ -429,10 +461,9 @@ QUnit.test('statsGraphVals', function (assert) {
 //             var answer = getStats(forStats, queryArr);
 //
 //             var traceDatum = statsGraphVals(queryArr, tableObj);
-//             traceDatum['name'] = graphDiv.data[nonNullDataIndex].name + ': ' + answer.pctChance + '%';
-//             var rgbaObj = colorObjs[nonNullDataIndex];
+//             traceDatum['name'] = statsGraphName(tableObj, answer.pctChance, queryArr);
 //
-//             traceDatum['fillcolor'] = 'rgba(' + (rgbaObj.r) + ',' + (rgbaObj.g) + ',' + (rgbaObj.b) +',0.5)';
+//             traceDatum['fillcolor'] = statsGraphColor(nonNullDataIndex, statsForm.id);
 //             traceDatum['statsGroup'] = statsForm.id;
 //             nonNullDataIndex++;
 //

@@ -138,6 +138,7 @@ function plotStats(statsForm) {
 
             traceDatum['fillcolor'] = statsGraphColor(nonNullDataIndex, statsForm.id);
             traceDatum['statsGroup'] = statsForm.id;
+            traceDatum['legendgroup'] = tableObj.repr;
             nonNullDataIndex++;
 
             statsData.push(traceDatum);
@@ -199,13 +200,13 @@ function statsGraphVals(queryArr, tableObj) {
         xVals.push(stop + 0.48);
         yVals.push(afterVal);
     }
-    return {x: xVals, y: yVals, type: 'scatter', mode: 'none', fill: 'tozeroy'};
+    return {x: xVals, y: yVals, type: 'scatter', mode: 'none', fill: 'tozeroy', hoverinfo:'skip'};
 }
 
 function statsGraphName(tableObj, pctString, queryArr) {
     var tableName = tableObj.repr.slice("<DiceTable containing ".length, -1);
-    var query = (queryArr.length === 1) ? queryArr[0]: queryArr[0] + '-' + queryArr[queryArr.length - 1];
-    return tableName + ': ' + query + '=' + pctString + '%';
+    var query = (queryArr.length === 1) ? queryArr[0]: queryArr[0] + 'to' + queryArr[queryArr.length - 1];
+    return tableName + ': [' + query + ']: ' + pctString + '%';
 }
 
 function statsGraphColor(matchGraphIndex, statsFormId) {
@@ -223,11 +224,10 @@ function statsGraphColor(matchGraphIndex, statsFormId) {
     ];
     var rgbaObj = colorObjs[matchGraphIndex];
     var modValues = [
-        [0, -10, 10], [10, 10, 10], [-10, -10, -10], [-10, 10, -10], [10, -10, 10], [-10, -10, 10],
-        [10, -10, -10], [-10, 10, 10], [10, 10, -10], [10, 0, -10], [-10, 0, 10], [0, 10, -10]
+        [0, -10, 10], [10, 10, 10], [-10, -10, -10], [-10, 10, -10], [10, -10, 10],
+        [-10, -10, 10], [10, -10, -10], [-10, 10, 10], [10, 10, -10], [10, 0, -10]
     ];
     var mod = modValues[statsFormId.slice(-1)];
-    console.log(mod);
 
     return 'rgba(' + (rgbaObj.r + mod[0]) + ',' + (rgbaObj.g + mod[1]) + ',' + (rgbaObj.b + mod[2]) +',0.5)';
 }

@@ -7,10 +7,19 @@ section {
     margin:10px;
 }
 
-#plotSettings {
-    width:120px;
+/*#plotSettings {*/
+    /*width:120px;*/
+/*}*/
+
+/*#plot {*/
+    /*width:550px;*/
+/*}*/
+
+.toLeft {
+    float: left;
 }
 
-#plot {
-    width:550px;
+#plotter {
+    width: 70%;
+    height: 100%;
 }
