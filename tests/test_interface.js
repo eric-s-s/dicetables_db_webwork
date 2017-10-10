@@ -426,60 +426,180 @@ QUnit.test('plotStats no tables contain tableObj so no change to graph data.', f
     stats0.left.value = 5;
     stats0.right.value = 10;
 
-    plotStats(stats0);
+    var tableEntries = plotStats(stats0);
     var afterData = graphDiv.data;
 
     assert.deepEqual(beforeData, afterData);
+    assert.equal(tableEntries.length, 0, 'no table entries.');
 });
 
 QUnit.test('plotStats', function (assert) {
     initTest();
+
+    var graphDiv = document.getElementById('plotter');
+
     var table0 = $('#table-0');
     var table2 = $("#table-2");
     table0.data('tableObj', fakeAnswer1);
     table2.data('tableObj', fakeAnswer2);
 
-    
+    plotCurrentTables();
+    assert.equal(graphDiv.data.length, 2, 'Setup has two traces in graph.');
+
+    var stats0 = document.getElementById('stats-0');
+    var stats1 = document.getElementById('stats-1');
+    stats0.left.value = 5;
+    stats0.right.value = 10;
+
+    stats1.left.value = 12;
+    stats1.right.value = 12;
+
+    var tableEntry0 = plotStats(stats0);
+    var expectedTableEntry = [
+        {
+            "header": "[3D4]",
+            "occurrences": "56.00",
+            "oneInChance": "1.143",
+            "pctChance": "87.50",
+            "total": "64.00"
+        },
+        {
+            "header": "[3D6]",
+            "occurrences": "104.0",
+            "oneInChance": "2.077",
+            "pctChance": "48.15",
+            "total": "216.0"
+        }
+    ];
+
+    assert.equal(graphDiv.data.length, 4, 'graphDiv now has four traces');
+    assert.deepEqual(tableEntry0, expectedTableEntry, 'tableEntry ouput is correct');
+    var expected3D4GraphData =
+        {
+            "fill": "tozeroy",
+            "fillcolor": "rgba(31,109,190,0.5)",
+            "hoverinfo": "skip",
+            "legendgroup": "<DiceTable containing [3D4]>",
+            "mode": "none",
+            "name": "[3D4]: [5to10]: 87.50%",
+            "statsGroup": "stats-0",
+            "type": "scatter",
+            "x": [
+                4.52,
+                5,
+                6,
+                7,
+                8,
+                9,
+                10,
+                10.48
+            ],
+            "y": [
+                7.125,
+                9.375,
+                15.624999999999998,
+                18.75,
+                18.75,
+                15.624999999999998,
+                9.375,
+                7.125
+            ]
+        };
+    for (var key in expected3D4GraphData) {
+        assert.deepEqual(graphDiv.data[2][key], expected3D4GraphData[key], 'all parts but uid are equal. 3D4')
+    }
+
+    var expected3D6GraphData =
+        {
+            "fill": "tozeroy",
+            "fillcolor": "rgba(255,117,24,0.5)",
+            "hoverinfo": "skip",
+            "legendgroup": "<DiceTable containing [3D6]>",
+            "mode": "none",
+            "name": "[3D6]: [5to10]: 48.15%",
+            "statsGroup": "stats-0",
+            "type": "scatter",
+            "x": [
+                4.52,
+                5,
+                6,
+                7,
+                8,
+                9,
+                10,
+                10.48
+            ],
+            "y": [
+                2.111111111111111,
+                2.7777777777777777,
+                4.62962962962963,
+                6.944444444444444,
+                9.722222222222221,
+                11.574074074074073,
+                12.5,
+                12.5
+            ]
+        };
+    for (key in expected3D6GraphData) {
+        assert.deepEqual(graphDiv.data[3][key], expected3D6GraphData[key], 'all parts but uid are equal. 3D6')
+    }
+
+    stats0.left.value = 6;
+    stats0.right.value = 6;
+
+    plotStats(stats0);
+
+    assert.equal(graphDiv.data.length, 4, 'length did not change when regraphing same statsForm.');
+    expected3D4GraphData = {
+        "fill": "tozeroy",
+        "fillcolor": "rgba(31,109,190,0.5)",
+        "hoverinfo": "skip",
+        "legendgroup": "<DiceTable containing [3D4]>",
+        "mode": "none",
+        "name": "[3D4]: [6]: 15.63%",
+        "statsGroup": "stats-0",
+        "type": "scatter",
+        "x": [
+            5.52,
+            6,
+            6.48
+        ],
+        "y": [
+            12.625,
+            15.624999999999998,
+            17.125
+        ]
+    };
+    for (key in expected3D4GraphData) {
+        assert.deepEqual(graphDiv.data[2][key], expected3D4GraphData[key], 'new 3D4 graph is equal')
+    }
+
+    expected3D6GraphData = {
+        "fill": "tozeroy",
+        "fillcolor": "rgba(255,117,24,0.5)",
+        "hoverinfo": "skip",
+        "legendgroup": "<DiceTable containing [3D6]>",
+        "mode": "none",
+        "name": "[3D6]: [6]: 4.630%",
+        "statsGroup": "stats-0",
+        "type": "scatter",
+        "x": [
+            5.52,
+            6,
+            6.48
+        ],
+        "y": [
+            3.7407407407407405,
+            4.62962962962963,
+            5.7407407407407405
+        ]
+    };
+    for (key in expected3D6GraphData) {
+        assert.deepEqual(graphDiv.data[3][key], expected3D6GraphData[key], 'new 3D6 graph is equal')
+    }
+
+    plotStats(stats1);
+    assert.equal(graphDiv.data.length, 6, 'plotting new statsForm makes new traces.');
 
 });
-// TODO
-// function plotStats(statsForm) {
-//     removeStatsTraces(statsForm.id);
-//     var graphDiv = document.getElementById('plotter');
-//
-//     var queryArr = getRange(statsForm.left.value, statsForm.right.value);
-//
-//     var statsData = [];
-//     var allAnswers = '';
-//     var nonNullDataIndex = 0;
-//
-//     $('.tableRequest').each(function () {
-//         var tableObj = $('#' + this.id).data('tableObj');
-//         if (tableObj !== null) {
-//
-//             var forStats = createSciNumObj(tableObj.forSciNum);
-//             var answer = getStats(forStats, queryArr);
-//
-//             var traceDatum = statsGraphVals(queryArr, tableObj);
-//             traceDatum['name'] = statsGraphName(tableObj, answer.pctChance, queryArr);
-//
-//             traceDatum['fillcolor'] = statsGraphColor(nonNullDataIndex, statsForm.id);
-//             traceDatum['statsGroup'] = statsForm.id;
-//             nonNullDataIndex++;
-//
-//             statsData.push(traceDatum);
-//             allAnswers += (JSON.stringify(answer) + '\n');
-//
-//         }
-//     });
-//
-//     Plotly.addTraces(graphDiv, statsData);
-//     $("#answer").text(allAnswers);
-// }
-
-
-
-
-
-
 

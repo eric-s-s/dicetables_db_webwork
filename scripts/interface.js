@@ -91,7 +91,7 @@ function plotCurrentTables () {
             var datum = {
                 x: tableObj.data[0],
                 y: tableObj.data[1],
-                name: tableObj.repr.slice("<DiceTable containing ".length, -1)
+                name: getDiceListString(tableObj.repr)
             };
             plotData.push(datum);
         }
@@ -123,7 +123,7 @@ function plotStats(statsForm) {
     var queryArr = getRange(statsForm.left.value, statsForm.right.value);
 
     var statsData = [];
-    var allAnswers = '';
+    var tableEntries = [];
     var nonNullDataIndex = 0;
 
     $('.tableRequest').each(function () {
@@ -131,10 +131,11 @@ function plotStats(statsForm) {
         if (tableObj !== null) {
 
             var forStats = createSciNumObj(tableObj.forSciNum);
-            var answer = getStats(forStats, queryArr);
+            var statsInfo = getStats(forStats, queryArr);
+            statsInfo['header'] = getDiceListString(tableObj.repr);
 
             var traceDatum = statsGraphVals(queryArr, tableObj);
-            traceDatum['name'] = statsGraphName(tableObj, answer.pctChance, queryArr);
+            traceDatum['name'] = statsGraphName(tableObj, statsInfo.pctChance, queryArr);
 
             traceDatum['fillcolor'] = statsGraphColor(nonNullDataIndex, statsForm.id);
             traceDatum['statsGroup'] = statsForm.id;
@@ -142,13 +143,13 @@ function plotStats(statsForm) {
             nonNullDataIndex++;
 
             statsData.push(traceDatum);
-            allAnswers += (JSON.stringify(answer) + '\n');
+            tableEntries.push(statsInfo);
 
         }
     });
 
     Plotly.addTraces(graphDiv, statsData);
-    $("#answer").text(allAnswers);
+    return tableEntries;
 }
 
 
@@ -204,9 +205,13 @@ function statsGraphVals(queryArr, tableObj) {
 }
 
 function statsGraphName(tableObj, pctString, queryArr) {
-    var tableName = tableObj.repr.slice("<DiceTable containing ".length, -1);
+    var tableName = getDiceListString(tableObj.repr);
     var query = (queryArr.length === 1) ? queryArr[0]: queryArr[0] + 'to' + queryArr[queryArr.length - 1];
     return tableName + ': [' + query + ']: ' + pctString + '%';
+}
+
+function getDiceListString(diceTableRepr) {
+    return diceTableRepr.slice("<DiceTable containing ".length, -1);
 }
 
 function statsGraphColor(matchGraphIndex, statsFormId) {
