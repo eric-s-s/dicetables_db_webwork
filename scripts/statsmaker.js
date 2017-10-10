@@ -13,12 +13,12 @@ function createStatsObj(total, sciNumArr){
     return statsObj;
 }
 
-function createSciNumObj(rollMantissaPowerObj) {
+function createSciNumObj(rollToMantissaPowerArr) {
     var outObj = {};
     var forTotal = [];
-    for (var roll in rollMantissaPowerObj){
-        if (rollMantissaPowerObj.hasOwnProperty(roll)) {
-            var manPowArr = rollMantissaPowerObj[roll];
+    for (var roll in rollToMantissaPowerArr){
+        if (rollToMantissaPowerArr.hasOwnProperty(roll)) {
+            var manPowArr = rollToMantissaPowerArr[roll];
             var number = new SciNum(manPowArr[0], manPowArr[1]);
             outObj[roll] = number;
             forTotal.push(number);
