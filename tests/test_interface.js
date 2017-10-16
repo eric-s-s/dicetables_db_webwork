@@ -209,6 +209,92 @@ QUnit.test('getRangesForStats sets min/value to min x. max to max x', function (
     });
 });
 
+QUnit.test('emptyStatsTable removes all table rows that are not .keeper class', function(assert){
+    var statsTable = $('#statsTable');
+    statsTable.append('<tr><th>removed</th></tr>');
+    statsTable.append('<tr class="keeper"><th>Kept</th></tr>');
+    assert.equal(statsTable.find('tr').length, 6, 'initial setup');
+    emptyStatsTable();
+    assert.equal(statsTable.find('tr').length, 5, 'removed non-keeper class');
+    statsTable.find('tr').each(function () {
+        assert.equal(this.className, 'keeper');
+    });
+});
+
+QUnit.test('emptyStatsTable keeps header elements and removes other elements', function (assert) {
+    var statsTable = $('#statsTable');
+    statsTable.append('<tr>to remove</tr>');
+    statsTable.find('tr').append('<td>rm</td>');
+    emptyStatsTable();
+    assert.equal(statsTable.find('td').length, 0);
+    var expectedHeaders = ['Table Name', 'Table Range', 'Mean', 'Std Dev'];
+    statsTable.find('th').each( function () {
+        assert.ok(expectedHeaders.indexOf(this.innerHTML) !== -1, 'table header elements in array, expectedHeaders');
+    });
+});
+
+QUnit.test('getTableObjStats', function (assert) {
+    var tableObj = {"repr": "<DiceTable containing [1D4  W:10]>",
+        "data": [[1, 2, 3, 4], [10.0, 20.0, 50.0, 20.0]],
+        "tableString": "1: 1\n2: 2\n3: 5\n4: 2\n",
+        "forSciNum": {"1": ["1.00000", "0"], "2": ["2.00000", "0"], "3": ["5.00000", "0"], "4": ["2.00000", "0"]},
+        "range": [1, 4],
+        "mean": 2.8,
+        "stddev": 0.8718};
+    var expectedColors = [
+        '#1f77b4',  // muted blue  rgba(31,119,180, 1)
+        '#ff7f0e',  // safety orange  rgba(255,127,14, 1)
+        '#2ca02c',  // cooked asparagus green  rgba(44,160,44, 1)
+        '#d62728',  // brick red  rgba(214,39,40, 1)
+        '#9467bd',  // muted purple  rgba(148,103,189, 1)
+        '#8c564b',  // chestnut brown  rgba(140,86,75, 1)
+        '#e377c2',  // raspberry yogurt pink  rgba(227,119,194, 1)
+        '#7f7f7f',  // middle gray  rgba(127,127,127, 1)
+        '#bcbd22',  // curry yellow-green  rgba(188,189,34, 1)
+        '#17becf'  // blue-teal  rgba(23,190,207, 1)
+    ];
+
+    var baseObj = {
+        tableName: '',
+        tableMean: "<td>2.8</td>",
+        tableRange: "<td>1 to 4</td>",
+        tableStdDev: "<td>0.8718</td>"
+    };
+    for (var i=0; i< 10; i++){
+        baseObj.tableName = "<td style='color:" + expectedColors[i] + "'>[1D4  W:10]</td>";
+        assert.deepEqual(baseObj, getTableObjStats(tableObj, i));
+    }
+    baseObj.tableName = "<td style='color:" + expectedColors[1] + "'>[1D4  W:10]</td>";
+    assert.deepEqual(baseObj, getTableObjStats(tableObj, 11), 'color indices loop over color arr');
+});
+
+// function resetStatsTable() {
+//     emptyStatsTable();
+//
+//     var colorIndex = 0;
+//
+//     var tableNames = $('#tableNames');
+//     var tableRange = $('#tableRange');
+//     var tableMean = $('#tableMean');
+//     var tableStdDev = $('#tableStdDev');
+//
+//     $('.tableRequest').each( function () {
+//         var tableObj = $('#' + this.id).data('tableObj');
+//         if (tableObj !== null) {
+//             var forStatsTable = getTableObjStats(tableObj, colorIndex);
+//             colorIndex++;
+//             tableNames.append(forStatsTable['tableNames']);
+//             tableRange.append(forStatsTable['tableRange']);
+//             tableMean.append(forStatsTable['tableMean']);
+//             tableStdDev.append(forStatsTable['tableStdDev']);
+//         }
+//     });
+// }
+//
+
+
+
+
 QUnit.test('getTable assigns tableObj to table according to value', function (assert) {
     initTest();
 

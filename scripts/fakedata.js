@@ -1,4 +1,4 @@
-var colors = [
+var colorsFakeData = [
     '#1f77b4',  // muted blue  rgba(31,119,180, 1)
     '#ff7f0e',  // safety orange  rgba(255,127,14, 1)
     '#2ca02c',  // cooked asparagus green  rgba(44,160,44, 1)

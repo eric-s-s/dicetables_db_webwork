@@ -7,13 +7,14 @@ section {
     margin:10px;
 }
 
-/*#plotSettings {*/
-    /*width:120px;*/
-/*}*/
-
-/*#plot {*/
-    /*width:550px;*/
-/*}*/
+input[type=text], select {
+    /*width: 100%;*/
+    padding: 5px 5px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    /*box-sizing: border-box;*/
+    /*resize: none;*/
+}
 
 .toLeft {
     float: left;
@@ -22,4 +23,17 @@ section {
 #plotter {
     width: 70%;
     height: 100%;
+}
+
+table, td, th {
+    border: 1px solid #ddd;
+    text-align: left;
+}
+
+table {
+    border-collapse: collapse;
+}
+
+th, td {
+    padding: 15px;
 }

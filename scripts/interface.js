@@ -33,7 +33,6 @@ function onPageLoad() {
 
     $('.rmTable').click(function () {hideTableForm(this.parentNode.id);});
 
-    $("#basic").text('stddev: ' + fakeAnswer1.stddev + '\nmean: ' + fakeAnswer1.mean + '\nrange: ' + fakeAnswer1.range);
 }
 
 function setUpHiddenForms(containerJQuery, classJQuery) {
@@ -99,6 +98,61 @@ function plotCurrentTables () {
     var graphDiv = document.getElementById('plotter');
     Plotly.newPlot(graphDiv, plotData, {margin: {t: 1}});
     getRangesForStats();
+    resetStatsTable();
+}
+
+function resetStatsTable() {
+    emptyStatsTable();
+
+    var colorIndex = 0;
+
+    var tableName = $('#tableName');
+    var tableRange = $('#tableRange');
+    var tableMean = $('#tableMean');
+    var tableStdDev = $('#tableStdDev');
+
+    $('.tableRequest').each( function () {
+        var tableObj = $('#' + this.id).data('tableObj');
+        if (tableObj !== null) {
+            var forStatsTable = getTableObjStats(tableObj, colorIndex);
+            colorIndex++;
+            tableName.append(forStatsTable['tableName']);
+            tableRange.append(forStatsTable['tableRange']);
+            tableMean.append(forStatsTable['tableMean']);
+            tableStdDev.append(forStatsTable['tableStdDev']);
+        }
+    });
+}
+
+function emptyStatsTable() {
+    var statsTable = $('#statsTable');
+    statsTable.find('tr:not(".keeper")').remove();
+    statsTable.find('td').remove();
+}
+
+function getTableObjStats(tableObj, index) {
+    var out = {};
+
+    var colors = [
+        '#1f77b4',  // muted blue  rgba(31,119,180, 1)
+        '#ff7f0e',  // safety orange  rgba(255,127,14, 1)
+        '#2ca02c',  // cooked asparagus green  rgba(44,160,44, 1)
+        '#d62728',  // brick red  rgba(214,39,40, 1)
+        '#9467bd',  // muted purple  rgba(148,103,189, 1)
+        '#8c564b',  // chestnut brown  rgba(140,86,75, 1)
+        '#e377c2',  // raspberry yogurt pink  rgba(227,119,194, 1)
+        '#7f7f7f',  // middle gray  rgba(127,127,127, 1)
+        '#bcbd22',  // curry yellow-green  rgba(188,189,34, 1)
+        '#17becf'  // blue-teal  rgba(23,190,207, 1)
+    ];
+    var color = colors[index % colors.length];
+    var name = getDiceListString(tableObj.repr);
+
+    out['tableName'] = "<td style='color:" + color + "'>" + name + "</td>";
+    out['tableRange'] = '<td>' + tableObj.range[0] + ' to ' + tableObj.range[1] + '</td>';
+    out['tableMean'] = '<td>' + tableObj.mean + '</td>';
+    out['tableStdDev'] = '<td>' + tableObj.stddev + '</td>';
+    return out;
 }
 
 function getRangesForStats() {
