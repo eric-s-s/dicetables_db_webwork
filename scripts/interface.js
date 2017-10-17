@@ -15,7 +15,8 @@ function onPageLoad() {
 
     allStatsForms.submit(function (event) {
         event.preventDefault();
-        plotStats(this);
+        var tableEntries = plotStats(this);
+        showStatsRow(this, tableEntries);
     });
 
     setUpHiddenForms(statRequestArea, allStatsForms);
@@ -49,6 +50,7 @@ function getTable(tableForm) {
     var index = tableForm.tableQuery.value % fakeList.length;
     $('#' + tableForm.id).data('tableObj', fakeList[index]);
     plotCurrentTables();
+    resetStatsTable();
 }
 
 function hideTableForm(idStr) {
@@ -60,6 +62,7 @@ function hideTableForm(idStr) {
     hiddenForms.push(idStr);
     hiddenForms.sort();
     plotCurrentTables();
+    resetStatsTable();
 }
 
 function hideStatsForm(idStr) {
@@ -70,6 +73,7 @@ function hideStatsForm(idStr) {
     hiddenForms.push(idStr);
     hiddenForms.sort();
     removeStatsTraces(idStr);
+    $('#rowFor-' + idStr).hide();
 }
 
 function showHiddenForm(requestAreaJQuery) {
@@ -98,9 +102,24 @@ function plotCurrentTables () {
     var graphDiv = document.getElementById('plotter');
     Plotly.newPlot(graphDiv, plotData, {margin: {t: 1}});
     getRangesForStats();
-    resetStatsTable();
 }
 
+function getRangesForStats() {
+    var data = document.getElementById('plotter').data;
+    var min = Infinity;
+    var max = -Infinity;
+    data.forEach(function (el) {
+        var xVals = el.x;
+        var elMin = Math.min.apply(null, xVals);
+        var elMax = Math.max.apply(null, xVals);
+        min = Math.min(min, elMin);
+        max = Math.max(max, elMax);
+    });
+    if (min === Infinity || max === -Infinity) {min = 0; max = 0;}
+    $('.statsInput').attr({'min': min, 'value': min, 'max': max});
+}
+
+// resteStatsTable
 function resetStatsTable() {
     emptyStatsTable();
 
@@ -126,7 +145,7 @@ function resetStatsTable() {
 
 function emptyStatsTable() {
     var statsTable = $('#statsTable');
-    statsTable.find('tr:not(".keeper")').remove();
+    statsTable.find('tr:not(".keeper")').hide();
     statsTable.find('td').remove();
 }
 
@@ -149,27 +168,13 @@ function getTableObjStats(tableObj, index) {
     var name = getDiceListString(tableObj.repr);
 
     out['tableName'] = "<td style='color:" + color + "'>" + name + "</td>";
-    out['tableRange'] = '<td>' + tableObj.range[0] + ' to ' + tableObj.range[1] + '</td>';
-    out['tableMean'] = '<td>' + tableObj.mean + '</td>';
-    out['tableStdDev'] = '<td>' + tableObj.stddev + '</td>';
+    out['tableRange'] = "<td style='color:" + color + "'>" + tableObj.range[0] + ' to ' + tableObj.range[1] + '</td>';
+    out['tableMean'] = "<td style='color:" + color + "'>" + tableObj.mean + '</td>';
+    out['tableStdDev'] = "<td style='color:" + color + "'>" + tableObj.stddev + '</td>';
     return out;
 }
 
-function getRangesForStats() {
-    var data = document.getElementById('plotter').data;
-    var min = Infinity;
-    var max = -Infinity;
-    data.forEach(function (el) {
-        var xVals = el.x;
-        var elMin = Math.min.apply(null, xVals);
-        var elMax = Math.max.apply(null, xVals);
-        min = Math.min(min, elMin);
-        max = Math.max(max, elMax);
-    });
-    if (min === Infinity || max === -Infinity) {min = 0; max = 0;}
-    $('.statsInput').attr({'min': min, 'value': min, 'max': max});
-}
-
+// plotStats and helpers
 function plotStats(statsForm) {
     removeStatsTraces(statsForm.id);
     var graphDiv = document.getElementById('plotter');
@@ -206,7 +211,6 @@ function plotStats(statsForm) {
     return tableEntries;
 }
 
-
 function removeStatsTraces(statsFormId) {
     var graphDiv = document.getElementById('plotter');
     var toRemove = [];
@@ -217,7 +221,6 @@ function removeStatsTraces(statsFormId) {
     }
     Plotly.deleteTraces(graphDiv, toRemove);
 }
-
 
 function getRange (left, right) {
     var leftInt = parseInt(left);
@@ -236,7 +239,6 @@ function getRange (left, right) {
     }
     return out;
 }
-
 
 function statsGraphVals(queryArr, tableObj) {
     var start = Math.max(queryArr[0], tableObj.range[0]);
@@ -264,10 +266,6 @@ function statsGraphName(tableObj, pctString, queryArr) {
     return tableName + ': [' + query + ']: ' + pctString + '%';
 }
 
-function getDiceListString(diceTableRepr) {
-    return diceTableRepr.slice("<DiceTable containing ".length, -1);
-}
-
 function statsGraphColor(matchGraphIndex, statsFormId) {
     var colorObjs = [
         {'r': 31, 'g': 119, 'b': 180, 'a': 0.5},
@@ -289,4 +287,39 @@ function statsGraphColor(matchGraphIndex, statsFormId) {
     var mod = modValues[statsFormId.slice(-1)];
 
     return 'rgba(' + (rgbaObj.r + mod[0]) + ',' + (rgbaObj.g + mod[1]) + ',' + (rgbaObj.b + mod[2]) +',0.5)';
+}
+
+// showStatsRow
+function showStatsRow(statsForm, tableEntries) {
+    var rowForStats = $('#rowFor-' + statsForm.id);
+    rowForStats[0].innerHTML = getTableRow(statsForm, tableEntries);
+    rowForStats.show();
+}
+
+function getTableRow(statsForm, tableEntries) {
+    var left = statsForm.left.value;
+    var right = statsForm.right.value;
+    var title = (parseInt(left) < parseInt(right)) ? left + ' to ' + right: right + ' to ' + left;
+    var tableRow = "<th>" + title + "</th>";
+    for (var i=0; i < tableEntries.length; i++) {
+        var entry = tableEntries[i];
+        tableRow += "<td class='tooltip'>" + entry.pctChance + ' %' + getToolTipText(entry) + '</td>';
+    }
+    return tableRow;
+}
+
+function getToolTipText(statsObj) {
+    var start = "<span class='tooltiptext'>";
+    var end = '</span>';
+    return (
+        start + 'ocurrences: ' + statsObj.occurrences +
+        '</br>out of total: ' + statsObj.total +
+        '</br>a one in ' + statsObj.oneInChance + ' chance' + end
+    );
+}
+
+
+
+function getDiceListString(diceTableRepr) {
+    return diceTableRepr.slice("<DiceTable containing ".length, -1);
 }

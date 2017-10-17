@@ -101,7 +101,9 @@ function initTest() {
     $(".tableRequest").data('tableObj', null);
     $('#tableRequestArea').data('hiddenForms', []);
     $('#statsRequestArea').data('hiddenForms', []);
-    Plotly.newPlot(document.getElementById('plotter'), [{x: [1], y: [1]}])
+    Plotly.newPlot(document.getElementById('plotter'), [{x: [0], y: [0]}]);
+    getRangesForStats();
+    $('.keeper').find('td').remove();
 }
 
 QUnit.test('plotCurrentTables no tables have data', function (assert) {
@@ -209,15 +211,15 @@ QUnit.test('getRangesForStats sets min/value to min x. max to max x', function (
     });
 });
 
-QUnit.test('emptyStatsTable removes all table rows that are not .keeper class', function(assert){
+QUnit.test('emptyStatsTable hides all table rows that are not .keeper class', function(assert){
     var statsTable = $('#statsTable');
     statsTable.append('<tr><th>removed</th></tr>');
     statsTable.append('<tr class="keeper"><th>Kept</th></tr>');
-    assert.equal(statsTable.find('tr').length, 6, 'initial setup');
+    assert.equal(statsTable.find('tr:visible').length, 6, 'initial setup');
     emptyStatsTable();
-    assert.equal(statsTable.find('tr').length, 5, 'removed non-keeper class');
-    statsTable.find('tr').each(function () {
-        assert.equal(this.className, 'keeper');
+    assert.equal(statsTable.find('tr:visible').length, 5, 'hid non-keeper class');
+    statsTable.find('tr:visible').each(function () {
+        assert.equal(this.className, 'keeper', 'only keeper class is visible.');
     });
 });
 
@@ -228,7 +230,7 @@ QUnit.test('emptyStatsTable keeps header elements and removes other elements', f
     emptyStatsTable();
     assert.equal(statsTable.find('td').length, 0);
     var expectedHeaders = ['Table Name', 'Table Range', 'Mean', 'Std Dev'];
-    statsTable.find('th').each( function () {
+    statsTable.find('th:visible').each( function () {
         assert.ok(expectedHeaders.indexOf(this.innerHTML) !== -1, 'table header elements in array, expectedHeaders');
     });
 });
@@ -255,45 +257,95 @@ QUnit.test('getTableObjStats', function (assert) {
     ];
 
     var baseObj = {
-        tableName: '',
-        tableMean: "<td>2.8</td>",
-        tableRange: "<td>1 to 4</td>",
-        tableStdDev: "<td>0.8718</td>"
+        tableName: "'>[1D4  W:10]</td>",
+        tableMean: "'>2.8</td>",
+        tableRange: "'>1 to 4</td>",
+        tableStdDev: "'>0.8718</td>"
     };
-    for (var i=0; i< 10; i++){
-        baseObj.tableName = "<td style='color:" + expectedColors[i] + "'>[1D4  W:10]</td>";
-        assert.deepEqual(baseObj, getTableObjStats(tableObj, i));
+    function applyColorPrefix(baseObj, colorPrefix){
+        var newObj = {};
+        for (var property in baseObj) {
+            if (baseObj.hasOwnProperty(property)){
+                newObj[property] = colorPrefix + baseObj[property];
+            }
+        }
+        return newObj;
     }
-    baseObj.tableName = "<td style='color:" + expectedColors[1] + "'>[1D4  W:10]</td>";
-    assert.deepEqual(baseObj, getTableObjStats(tableObj, 11), 'color indices loop over color arr');
+    for (var i=0; i< 10; i++){
+        var colorPrefix = "<td style='color:" + expectedColors[i];
+        var toTest = applyColorPrefix(baseObj, colorPrefix);
+        assert.deepEqual(toTest, getTableObjStats(tableObj, i));
+    }
+    toTest = applyColorPrefix(baseObj, "<td style='color:" + expectedColors[1]);
+    assert.deepEqual(toTest, getTableObjStats(tableObj, 11), 'color indices loop over color arr');
 });
 
-// function resetStatsTable() {
-//     emptyStatsTable();
-//
-//     var colorIndex = 0;
-//
-//     var tableNames = $('#tableNames');
-//     var tableRange = $('#tableRange');
-//     var tableMean = $('#tableMean');
-//     var tableStdDev = $('#tableStdDev');
-//
-//     $('.tableRequest').each( function () {
-//         var tableObj = $('#' + this.id).data('tableObj');
-//         if (tableObj !== null) {
-//             var forStatsTable = getTableObjStats(tableObj, colorIndex);
-//             colorIndex++;
-//             tableNames.append(forStatsTable['tableNames']);
-//             tableRange.append(forStatsTable['tableRange']);
-//             tableMean.append(forStatsTable['tableMean']);
-//             tableStdDev.append(forStatsTable['tableStdDev']);
-//         }
-//     });
-// }
-//
 
+QUnit.test('resetStatsTable', function (assert) {
+    initTest();
 
+    var tableName = $('#tableName');
+    var tableRange = $('#tableRange');
+    var tableMean = $('#tableMean');
+    var tableStdDev = $('#tableStdDev');
 
+    var table0 = $("#table-0");
+
+    table0.data('tableObj', fakeAnswer3); // [-2, 3d6] "range": [1, 16], "mean": 8.5, "stddev": 2.958
+    $('#table-1').data('tableObj', fakeAnswer1); // [3D4] 'stddev': 1.9365, 'mean': 7.5, 'range': [3, 12]
+    $('#rowFor-stats-0').show();
+
+    resetStatsTable();
+
+    assert.ok($('#statsTable').find('tr:visible').is('.keeper'), 'hides correct rows.');
+
+    var expectedHeaders = ['[-2, 3D6]', '[3D4]'];
+    var expectedColors = [['#1f77b4', 'rgb(31, 119, 180)'], ['#ff7f0e', 'rgb(255, 127, 14)']];
+    tableName.find('td').each( function (index) {
+        assert.equal(this.innerHTML, expectedHeaders[index], 'tableName text');
+        assert.ok((this.style.color === expectedColors[index][0] || this.style.color === expectedColors[index][1]),
+            'tableName color');
+    });
+
+    var expectedRange = ['1 to 16', '3 to 12'];
+    tableRange.find('td').each( function(index) {
+        assert.equal(this.innerHTML, expectedRange[index], 'tableRange');
+    });
+
+    var expectedMean = ['8.5', '7.5'];
+    tableMean.find('td').each( function(index) {
+        assert.equal(this.innerHTML, expectedMean[index], 'tableMean');
+    });
+
+    var expectedStddev = ['2.958','1.9365'];
+    tableStdDev.find('td').each( function(index){
+        assert.equal(this.innerHTML, expectedStddev[index], 'tablestddev');
+    });
+
+    table0.data('tableObj', null);
+    resetStatsTable();
+    tableName.find('td').each( function (index) {
+        assert.equal(this.innerHTML, '[3D4]', 'Removed first tableObj - tableName text');
+        assert.ok((this.style.color === '#1f77b4' || this.style.color === 'rgb(31, 119, 180)'),
+            'Removed first tableObj -tableName color');
+        assert.ok(index < 1, 'only one el tableName');
+    });
+
+    tableRange.find('td').each( function(index) {
+        assert.equal(this.innerHTML, '3 to 12', 'Removed first tableObj - tableRange');
+        assert.ok(index < 1, 'only one el tableRange');
+    });
+
+    tableMean.find('td').each( function(index) {
+        assert.equal(this.innerHTML, '7.5', 'Removed first tableObj - tableMean');
+        assert.ok(index < 1, 'only one el tableMean');
+    });
+
+    tableStdDev.find('td').each( function(index){
+        assert.equal(this.innerHTML, '1.9365', 'Removed first tableObj - tablestddev');
+        assert.ok(index < 1, 'only one el tableStdDev');
+    });
+});
 
 QUnit.test('getTable assigns tableObj to table according to value', function (assert) {
     initTest();
@@ -308,16 +360,23 @@ QUnit.test('getTable assigns tableObj to table according to value', function (as
     assert.deepEqual(table0.data('tableObj'), fakeAnswer3);
 });
 
-QUnit.test('getTable plots current tables', function (assert) {
+QUnit.test('getTable plots current tables and resets StatsTable', function (assert) {
     initTest();
 
     var graphDiv = document.getElementById('plotter');
+    var tableName = $('#tableName');
+
+    assert.equal(tableName.find('td').length, 0, 'statsTable names is empty');
 
     getTable(document.getElementById('table-0'));
 
     assert.deepEqual(graphDiv.data[0].x, fakeAnswer1.data[0], 'one graph x vals');
     assert.deepEqual(graphDiv.data[0].y, fakeAnswer1.data[1], 'one graph y vals');
     assert.equal(graphDiv.data.length, 1, 'one graph data only one length');
+    var expectedNames = ['[3D4]'];
+    tableName.find('td').each( function (index) {
+        assert.equal(this.innerHTML, expectedNames[index], 'statsTable names are correct');
+    });
 
     getTable(document.getElementById('table-1'));
 
@@ -328,6 +387,10 @@ QUnit.test('getTable plots current tables', function (assert) {
     assert.deepEqual(graphDiv.data[1].y, fakeAnswer2.data[1], 'second graph y vals');
 
     assert.equal(graphDiv.data.length, 2, 'data length 2');
+    expectedNames.push('[3D6]');
+    tableName.find('td').each( function (index) {
+        assert.equal(this.innerHTML, expectedNames[index], 'statsTable names are correct 2 names');
+    });
 });
 
 QUnit.test('hideTableForm test all actions', function (assert) {
@@ -339,6 +402,7 @@ QUnit.test('hideTableForm test all actions', function (assert) {
     getTable(table1[0]);
 
     var graphDiv = document.getElementById('plotter');
+    var tableName = $('#tableName');
 
     hideTableForm('table-0');
 
@@ -349,6 +413,10 @@ QUnit.test('hideTableForm test all actions', function (assert) {
     assert.deepEqual(graphDiv.data[0].y, table1.data('tableObj').data[1], 'graphDiv info is table1 info: y');
     assert.deepEqual($('#tableRequestArea').data('hiddenForms'), ['table-0'],
         'table put back into hiddenforms (testInit() makes "hiddenForms" an empty list)');
+    tableName.find('td').each( function (index) {
+        assert.ok(index < 1, 'only one name in tableName');
+        assert.equal(this.innerHTML, '[3D6]', 'only name is from table-1');
+    });
 
 });
 
@@ -399,8 +467,10 @@ QUnit.test('hideStatsForm all actions', function (assert) {
     initTest();
     var statsArea = $('#statsRequestArea');
     var stats0 = $('#stats-0');
+    var rowForStats0 = $('#rowFor-stats-0');
 
     showHiddenForm(statsArea);
+    rowForStats0.show();
 
     var group1 = [{x: [3], y: [3], name:'3', statsGroup: 'stats-0'}, {x: [4], y: [4], name:'4', statsGroup: 'stats-0'}];
     var groupNull = [{x: [5], y: [5], name:'5'}, {x: [6], y: [6], name:'6'}];
@@ -415,6 +485,7 @@ QUnit.test('hideStatsForm all actions', function (assert) {
     hideStatsForm('stats-0');
 
     assert.ok(stats0.is(":hidden"), 'statsForm is now hidden');
+    assert.ok(rowForStats0.is(":hidden"), 'rowFor-stats-0 is now hidden');
 
     assert.equal(stats0[0].left.min, 3, 'left min reset');
     assert.equal(stats0[0].left.max, 6, 'left max reset');
@@ -687,5 +758,77 @@ QUnit.test('plotStats', function (assert) {
     plotStats(stats1);
     assert.equal(graphDiv.data.length, 6, 'plotting new statsForm makes new traces.');
 
+});
+
+QUnit.test('getToolTipText', function(assert){
+    var statsObj = {
+        header: '[1D6]',
+        total: "10.00",
+        occurrences: "50.00",
+        oneInChance: "1.000",
+        pctChance: "100.0"
+    };
+    var answer = getToolTipText(statsObj);
+    var expected = (
+        "<span class='tooltiptext'>ocurrences: 50.00</br>out of total: 10.00</br>a one in 1.000 chance</span>"
+    );
+    assert.equal(expected, answer);
+});
+
+QUnit.test('getTableRow empty entries just return table header', function (assert) {
+    initTest();
+    var stats0 = document.getElementById('stats-0');
+    var answer = getTableRow(stats0, []);
+    assert.equal('<th>0 to 0</th>', answer, 'basic');
+
+    stats0.left.value = '3';
+    stats0.right.value = '5';
+    answer = getTableRow(stats0, []);
+    assert.equal('<th>3 to 5</th>', answer, 'left smaller than right');
+
+    stats0.left.value = '5';
+    stats0.right.value = '3';
+    answer = getTableRow(stats0, []);
+    assert.equal('<th>3 to 5</th>', answer, 'right smaller than left');
+
+    stats0.left.value = '5';
+    stats0.right.value = '5';
+    answer = getTableRow(stats0, []);
+    assert.equal('<th>5 to 5</th>', answer, 'right and left equal');
+});
+
+
+QUnit.test('getTableRow with entries', function (assert) {
+    initTest();
+    var statsObj0 = {header: '[1D6]',total: "10",occurrences: "2",oneInChance: "5",pctChance: "20"};
+    var statsObj1 = {header: '[2D8]',total: "12",occurrences: "3",oneInChance: "4",pctChance: "25"};
+    var tooltip0 = getToolTipText(statsObj0);
+    var tooltip1 = getToolTipText(statsObj1);
+    var header = "<th>0 to 0</th>";
+    var expected0 = "<td class='tooltip'>20 %" + tooltip0 + '</td>';
+    var expected1 = "<td class='tooltip'>25 %" + tooltip1 + '</td>';
+    assert.equal(
+        getTableRow(document.getElementById('stats-0'), [statsObj0, statsObj1]),
+        header + expected0 + expected1
+        );
+
+});
+
+QUnit.test('showStatsRow', function (assert) {
+    initTest();
+    var rowForStats0 = $('#rowFor-stats-0');
+    rowForStats0.hide();
+    rowForStats0[0].innerHTML = "<th>whoops</th><td>ummmm</td>";
+
+    var statsObj0 = {header: '[1D6]',total: "10",occurrences: "2",oneInChance: "5",pctChance: "20"};
+    var statsObj1 = {header: '[2D8]',total: "12",occurrences: "3",oneInChance: "4",pctChance: "25"};
+    var allTheText = (
+        '20 %ocurrences: 2out of total: 10a one in 5 chance25 %ocurrences: 3out of total: 12a one in 4 chance'
+    );
+
+
+    showStatsRow(document.getElementById('stats-0'), [statsObj0, statsObj1]);
+    assert.ok(rowForStats0.is(':visible'), 'row is shown');
+    assert.equal(rowForStats0.find('td').text(), allTheText, 'row has all the expected text');
 });
 
