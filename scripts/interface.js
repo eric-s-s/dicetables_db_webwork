@@ -77,9 +77,9 @@ function hideStatsForm(idStr) {
 }
 
 function showHiddenForm(requestAreaJQuery) {
-    var hiddentTables = requestAreaJQuery.data('hiddenForms');
-    if (hiddentTables.length > 0) {
-        var idStr = hiddentTables.shift();
+    var hiddenTables = requestAreaJQuery.data('hiddenForms');
+    if (hiddenTables.length > 0) {
+        var idStr = hiddenTables.shift();
         $('#' + idStr).show();
         return idStr;
     }
@@ -87,14 +87,18 @@ function showHiddenForm(requestAreaJQuery) {
 }
 
 function plotCurrentTables () {
+    var markersCutOff = 100;
+
     var plotData = [];
     $('.tableRequest').each( function () {
         var tableObj = $('#' + this.id).data('tableObj');
         if (tableObj !== null) {
+            var mode = (tableObj.data[0].length <= markersCutOff) ? "lines+markers" : "lines";
             var datum = {
                 x: tableObj.data[0],
                 y: tableObj.data[1],
-                name: getDiceListString(tableObj.name)
+                name: getDiceListString(tableObj.name),
+                mode: mode
             };
             plotData.push(datum);
         }
@@ -119,7 +123,7 @@ function getRangesForStats() {
     $('.statsInput').attr({'min': min, 'value': min, 'max': max});
 }
 
-// resteStatsTable
+// resetStatsTable
 function resetStatsTable() {
     emptyStatsTable();
 
@@ -166,12 +170,7 @@ function getTableObjStats(tableObj, index) {
     ];
     var color = colors[index % colors.length];
     var name = getDiceListString(tableObj.name);
-    var tooltipText = "<span class='tooltiptext'>" + tableObj.diceStr.replace('\n', '</br>') + "</span>";
-
-
-    //"<td class='tooltip'>" + entry.pctChance + ' %' + getToolTipText(entry) + '</td>'"<span class='tooltiptext'>"
-
-
+    var tooltipText = "<span class='tooltiptext'>" + tableObj.diceStr.replace(/\n/g, '</br>') + "</span>";
 
     out['tableName'] = "<td class='tooltip' style='color:" + color + "'>" + name + tooltipText + "</td>";
     out['tableRange'] = "<td style='color:" + color + "'>" + tableObj.range[0] + ' to ' + tableObj.range[1] + '</td>';
@@ -318,12 +317,12 @@ function getToolTipText(statsObj) {
     var start = "<span class='tooltiptext'>";
     var end = '</span>';
     return (
-        start + 'ocurrences: ' + statsObj.occurrences +
+        start + 'occurrences: ' + statsObj.occurrences +
         '</br>out of total: ' + statsObj.total +
         '</br>a one in ' + statsObj.oneInChance + ' chance' + end
     );
 }
 
-function getDiceListString(diceTableRepr) {
-    return diceTableRepr.slice("<DiceTable containing ".length, -1);
+function getDiceListString(diceTableName) {
+    return diceTableName.slice("<DiceTable containing ".length, -1);
 }

@@ -155,6 +155,39 @@ QUnit.test('plotCurrentTables tables gets new min and max', function (assert) {
     });
 });
 
+QUnit.test('plotCurrentTables mode set according to cutoff', function (assert) {
+    initTest();
+    var xVals0 = [];
+    var xVals1 = [];
+    var yVals0 = [];
+    var yVals1 = [];
+    for (var value=0; value < 100; value++) {
+        xVals0.push(value);
+        xVals1.push(value);
+        yVals0.push(value * 2);
+        yVals1.push(value * 2);
+    }
+    xVals1.push(100);
+    yVals1.push(200);
+    var tableObj0 = {
+        "name": "object0",
+        "diceStr": 'object0',
+        "data": [xVals0, yVals0]
+    };
+    var tableObj1 = {
+        "name": "object1",
+        "diceStr": 'object1',
+        "data": [xVals1, yVals1]
+    };
+    $('#table-0').data('tableObj', tableObj0);
+    $('#table-1').data('tableObj', tableObj1);
+    plotCurrentTables();
+
+    var data = document.getElementById('plotter').data;
+    assert.equal(data[0].mode, "lines+markers", 'data with 100pts or less uses markers');
+    assert.equal(data[1].mode, "lines", 'data with over 100pts does not use markers');
+});
+
 QUnit.test('getRangesForStats sets min/max/value to 0 if data is empty', function (assert) {
     initTest();
     plotCurrentTables(); // set up empty data.
@@ -258,17 +291,17 @@ QUnit.test('getTableObjStats', function (assert) {
     ];
 
     var baseObj = {
-        tableName: ("<td class='tooltip' style='color:REPLACE'>[1D4  W:10]" +
+        tableName: ("<td class='tooltip' style='color:black'>[1D4  W:10]" +
             "<span class='tooltiptext'>WeightedDie({1: 1, 4: 9})</span></td>"),
-        tableMean: "<td style='color:REPLACE'>2.8</td>",
-        tableRange: "<td style='color:REPLACE'>1 to 4</td>",
-        tableStdDev: "<td style='color:REPLACE'>0.8718</td>"
+        tableMean: "<td style='color:black'>2.8</td>",
+        tableRange: "<td style='color:black'>1 to 4</td>",
+        tableStdDev: "<td style='color:black'>0.8718</td>"
     };
     function applyColor(baseObj, color){
         var newObj = {};
         for (var property in baseObj) {
             if (baseObj.hasOwnProperty(property)){
-                newObj[property] = baseObj[property].replace('REPLACE', color);
+                newObj[property] = baseObj[property].replace('black', color);
             }
         }
         return newObj;
@@ -279,6 +312,19 @@ QUnit.test('getTableObjStats', function (assert) {
     }
     toTest = applyColor(baseObj, expectedColors[1]);
     assert.deepEqual(toTest, getTableObjStats(tableObj, 11), 'color indices loop over color arr');
+});
+
+QUnit.test('getTableObjStats all \\n are replaced by \<\/br\>', function(assert) {
+    var tableObj = {
+        "name": "<DiceTable containing [1D4]>",
+        "diceStr": 'line1\nline2\nline3',
+        "range": [1, 4],
+        "mean": 2.8,
+        "stddev": 0.8718};
+    var answer = getTableObjStats(tableObj, 0);
+    var expectedName = ("<td class='tooltip' style='color:#1f77b4'>[1D4]" +
+        "<span class='tooltiptext'>line1</br>line2</br>line3</span></td>");
+    assert.equal(answer.tableName, expectedName);
 });
 
 
@@ -318,9 +364,9 @@ QUnit.test('resetStatsTable', function (assert) {
         assert.equal(this.innerHTML, expectedMean[index], 'tableMean');
     });
 
-    var expectedStddev = ['2.958','1.9365'];
+    var expectedStdDev = ['2.958','1.9365'];
     tableStdDev.find('td').each( function(index){
-        assert.equal(this.innerHTML, expectedStddev[index], 'tablestddev');
+        assert.equal(this.innerHTML, expectedStdDev[index], 'tablestddev');
     });
 
     table0.data('tableObj', null);
@@ -632,7 +678,7 @@ QUnit.test('plotStats', function (assert) {
     ];
 
     assert.equal(graphDiv.data.length, 4, 'graphDiv now has four traces');
-    assert.deepEqual(tableEntry0, expectedTableEntry, 'tableEntry ouput is correct');
+    assert.deepEqual(tableEntry0, expectedTableEntry, 'tableEntry output is correct');
     var expected3D4GraphData =
         {
             "fill": "tozeroy",
@@ -772,7 +818,7 @@ QUnit.test('getToolTipText', function(assert){
     };
     var answer = getToolTipText(statsObj);
     var expected = (
-        "<span class='tooltiptext'>ocurrences: 50.00</br>out of total: 10.00</br>a one in 1.000 chance</span>"
+        "<span class='tooltiptext'>occurrences: 50.00</br>out of total: 10.00</br>a one in 1.000 chance</span>"
     );
     assert.equal(expected, answer);
 });
@@ -825,7 +871,7 @@ QUnit.test('showStatsRow', function (assert) {
     var statsObj0 = {header: '[1D6]',total: "10",occurrences: "2",oneInChance: "5",pctChance: "20"};
     var statsObj1 = {header: '[2D8]',total: "12",occurrences: "3",oneInChance: "4",pctChance: "25"};
     var allTheText = (
-        '20 %ocurrences: 2out of total: 10a one in 5 chance25 %ocurrences: 3out of total: 12a one in 4 chance'
+        '20 %occurrences: 2out of total: 10a one in 5 chance25 %occurrences: 3out of total: 12a one in 4 chance'
     );
 
 
