@@ -94,7 +94,7 @@ function plotCurrentTables () {
             var datum = {
                 x: tableObj.data[0],
                 y: tableObj.data[1],
-                name: getDiceListString(tableObj.repr)
+                name: getDiceListString(tableObj.name)
             };
             plotData.push(datum);
         }
@@ -165,9 +165,15 @@ function getTableObjStats(tableObj, index) {
         '#17becf'  // blue-teal  rgba(23,190,207, 1)
     ];
     var color = colors[index % colors.length];
-    var name = getDiceListString(tableObj.repr);
+    var name = getDiceListString(tableObj.name);
+    var tooltipText = "<span class='tooltiptext'>" + tableObj.diceStr.replace('\n', '</br>') + "</span>";
 
-    out['tableName'] = "<td style='color:" + color + "'>" + name + "</td>";
+
+    //"<td class='tooltip'>" + entry.pctChance + ' %' + getToolTipText(entry) + '</td>'"<span class='tooltiptext'>"
+
+
+
+    out['tableName'] = "<td class='tooltip' style='color:" + color + "'>" + name + tooltipText + "</td>";
     out['tableRange'] = "<td style='color:" + color + "'>" + tableObj.range[0] + ' to ' + tableObj.range[1] + '</td>';
     out['tableMean'] = "<td style='color:" + color + "'>" + tableObj.mean + '</td>';
     out['tableStdDev'] = "<td style='color:" + color + "'>" + tableObj.stddev + '</td>';
@@ -191,14 +197,14 @@ function plotStats(statsForm) {
 
             var forStats = createSciNumObj(tableObj.forSciNum);
             var statsInfo = getStats(forStats, queryArr);
-            statsInfo['header'] = getDiceListString(tableObj.repr);
+            statsInfo['header'] = getDiceListString(tableObj.name);
 
             var traceDatum = statsGraphVals(queryArr, tableObj);
             traceDatum['name'] = statsGraphName(tableObj, statsInfo.pctChance, queryArr);
 
             traceDatum['fillcolor'] = statsGraphColor(nonNullDataIndex, statsForm.id);
             traceDatum['statsGroup'] = statsForm.id;
-            traceDatum['legendgroup'] = tableObj.repr;
+            traceDatum['legendgroup'] = tableObj.diceStr;
             nonNullDataIndex++;
 
             statsData.push(traceDatum);
@@ -261,7 +267,7 @@ function statsGraphVals(queryArr, tableObj) {
 }
 
 function statsGraphName(tableObj, pctString, queryArr) {
-    var tableName = getDiceListString(tableObj.repr);
+    var tableName = getDiceListString(tableObj.name);
     var query = (queryArr.length === 1) ? queryArr[0]: queryArr[0] + 'to' + queryArr[queryArr.length - 1];
     return tableName + ': [' + query + ']: ' + pctString + '%';
 }
@@ -317,8 +323,6 @@ function getToolTipText(statsObj) {
         '</br>a one in ' + statsObj.oneInChance + ' chance' + end
     );
 }
-
-
 
 function getDiceListString(diceTableRepr) {
     return diceTableRepr.slice("<DiceTable containing ".length, -1);

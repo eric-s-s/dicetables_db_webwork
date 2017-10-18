@@ -31,7 +31,8 @@ var colorsRGBA = [
 
 var fakeAnswer1 = {
     'data': [[3, 4, 5, 6, 7, 8, 9, 10, 11, 12], [1.5625, 4.6875, 9.375, 15.624999999999998, 18.75, 18.75, 15.624999999999998, 9.375, 4.6875, 1.5625]],
-    'repr': '<DiceTable containing [3D4]>',
+    'name': '<DiceTable containing [3D4]>',
+    "diceStr": "Die(4): 3",
     'tableString': ' 3: 1\n 4: 3\n 5: 6\n 6: 10\n 7: 12\n 8: 12\n 9: 10\n10: 6\n11: 3\n12: 1\n',
     'forSciNum': {3: ['1.00000', '0'],
         4: ['3.00000', '0'],
@@ -50,7 +51,8 @@ var fakeAnswer1 = {
 };
 
 var fakeAnswer2 = {
-    "repr": "<DiceTable containing [3D6]>",
+    "name": "<DiceTable containing [3D6]>",
+    "diceStr": "Die(6): 3",
     "data": [
         [3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18],
         [0.4629629629629629, 1.3888888888888888, 2.7777777777777777, 4.62962962962963, 6.944444444444444,
@@ -83,7 +85,8 @@ var fakeAnswer2 = {
 };
 
 var fakeAnswer3 = {
-    "repr": "<DiceTable containing [-2, 3D6]>",
+    "name": "<DiceTable containing [-2, 3D6]>",
+    "diceStr": "Modifier(-2): 1\nDie(6): 3",
     "data": [
         [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16],
         [
@@ -117,7 +120,8 @@ var fakeAnswer3 = {
 };
 
 var fakeAnswer4 = {
-    "repr": "<DiceTable containing [1D4, 2D6]>",
+    "name": "<DiceTable containing [1D4, 2D6]>",
+    "diceStr": "Die(4): 1\nDie(6): 2",
     "data": [
         [3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16],
         [

@@ -236,7 +236,8 @@ QUnit.test('emptyStatsTable keeps header elements and removes other elements', f
 });
 
 QUnit.test('getTableObjStats', function (assert) {
-    var tableObj = {"repr": "<DiceTable containing [1D4  W:10]>",
+    var tableObj = {"name": "<DiceTable containing [1D4  W:10]>",
+        "diceStr": 'WeightedDie({1: 1, 4: 9})',
         "data": [[1, 2, 3, 4], [10.0, 20.0, 50.0, 20.0]],
         "tableString": "1: 1\n2: 2\n3: 5\n4: 2\n",
         "forSciNum": {"1": ["1.00000", "0"], "2": ["2.00000", "0"], "3": ["5.00000", "0"], "4": ["2.00000", "0"]},
@@ -257,26 +258,26 @@ QUnit.test('getTableObjStats', function (assert) {
     ];
 
     var baseObj = {
-        tableName: "'>[1D4  W:10]</td>",
-        tableMean: "'>2.8</td>",
-        tableRange: "'>1 to 4</td>",
-        tableStdDev: "'>0.8718</td>"
+        tableName: ("<td class='tooltip' style='color:REPLACE'>[1D4  W:10]" +
+            "<span class='tooltiptext'>WeightedDie({1: 1, 4: 9})</span></td>"),
+        tableMean: "<td style='color:REPLACE'>2.8</td>",
+        tableRange: "<td style='color:REPLACE'>1 to 4</td>",
+        tableStdDev: "<td style='color:REPLACE'>0.8718</td>"
     };
-    function applyColorPrefix(baseObj, colorPrefix){
+    function applyColor(baseObj, color){
         var newObj = {};
         for (var property in baseObj) {
             if (baseObj.hasOwnProperty(property)){
-                newObj[property] = colorPrefix + baseObj[property];
+                newObj[property] = baseObj[property].replace('REPLACE', color);
             }
         }
         return newObj;
     }
     for (var i=0; i< 10; i++){
-        var colorPrefix = "<td style='color:" + expectedColors[i];
-        var toTest = applyColorPrefix(baseObj, colorPrefix);
+        var toTest = applyColor(baseObj, expectedColors[i]);
         assert.deepEqual(toTest, getTableObjStats(tableObj, i));
     }
-    toTest = applyColorPrefix(baseObj, "<td style='color:" + expectedColors[1]);
+    toTest = applyColor(baseObj, expectedColors[1]);
     assert.deepEqual(toTest, getTableObjStats(tableObj, 11), 'color indices loop over color arr');
 });
 
@@ -302,7 +303,7 @@ QUnit.test('resetStatsTable', function (assert) {
     var expectedHeaders = ['[-2, 3D6]', '[3D4]'];
     var expectedColors = [['#1f77b4', 'rgb(31, 119, 180)'], ['#ff7f0e', 'rgb(255, 127, 14)']];
     tableName.find('td').each( function (index) {
-        assert.equal(this.innerHTML, expectedHeaders[index], 'tableName text');
+        assert.equal(this.innerHTML.indexOf(expectedHeaders[index]), 0, 'tableName text');
         assert.ok((this.style.color === expectedColors[index][0] || this.style.color === expectedColors[index][1]),
             'tableName color');
     });
@@ -325,7 +326,7 @@ QUnit.test('resetStatsTable', function (assert) {
     table0.data('tableObj', null);
     resetStatsTable();
     tableName.find('td').each( function (index) {
-        assert.equal(this.innerHTML, '[3D4]', 'Removed first tableObj - tableName text');
+        assert.equal(this.innerHTML.indexOf('[3D4]'), 0, 'Removed first tableObj - tableName text');
         assert.ok((this.style.color === '#1f77b4' || this.style.color === 'rgb(31, 119, 180)'),
             'Removed first tableObj -tableName color');
         assert.ok(index < 1, 'only one el tableName');
@@ -375,7 +376,7 @@ QUnit.test('getTable plots current tables and resets StatsTable', function (asse
     assert.equal(graphDiv.data.length, 1, 'one graph data only one length');
     var expectedNames = ['[3D4]'];
     tableName.find('td').each( function (index) {
-        assert.equal(this.innerHTML, expectedNames[index], 'statsTable names are correct');
+        assert.equal(this.innerHTML.indexOf(expectedNames[index]), 0, 'statsTable names are correct');
     });
 
     getTable(document.getElementById('table-1'));
@@ -389,7 +390,7 @@ QUnit.test('getTable plots current tables and resets StatsTable', function (asse
     assert.equal(graphDiv.data.length, 2, 'data length 2');
     expectedNames.push('[3D6]');
     tableName.find('td').each( function (index) {
-        assert.equal(this.innerHTML, expectedNames[index], 'statsTable names are correct 2 names');
+        assert.equal(this.innerHTML.indexOf(expectedNames[index]), 0, 'statsTable names are correct 2 names');
     });
 });
 
@@ -415,7 +416,7 @@ QUnit.test('hideTableForm test all actions', function (assert) {
         'table put back into hiddenforms (testInit() makes "hiddenForms" an empty list)');
     tableName.find('td').each( function (index) {
         assert.ok(index < 1, 'only one name in tableName');
-        assert.equal(this.innerHTML, '[3D6]', 'only name is from table-1');
+        assert.equal(this.innerHTML.indexOf('[3D6]'), 0, 'only name is from table-1');
     });
 
 });
@@ -514,6 +515,7 @@ QUnit.test('getRange', function (assert) {
 
 QUnit.test('statsGraphVals', function (assert) {
     var tableObj = {"repr": "<DiceTable containing [1D4  W:10]>",
+        "diceStr": 'WeightedDie({1: 1, 4: 9})',
         "data": [[1, 2, 3, 4], [10.0, 20.0, 50.0, 20.0]],
         "tableString": "1: 1\n2: 2\n3: 5\n4: 2\n",
         "forSciNum": {"1": ["1.00000", "0"], "2": ["2.00000", "0"], "3": ["5.00000", "0"], "4": ["2.00000", "0"]},
@@ -551,7 +553,7 @@ QUnit.test('statsGraphVals', function (assert) {
 });
 
 QUnit.test('statsGraphName tableObj has set name, pctString is any str and queryArr is in order', function (assert) {
-    var tableObj = {'repr': '<DiceTable containing [1D4  W:3, 2D6]>'};
+    var tableObj = {'name': '<DiceTable containing [1D4  W:3, 2D6]>'};
     assert.equal(statsGraphName(tableObj, '1.23e-10', [2]), '[1D4  W:3, 2D6]: [2]: 1.23e-10%',
         'single query. pct str in number range');
     assert.equal(statsGraphName(tableObj, '1.23e-1000', [2]), '[1D4  W:3, 2D6]: [2]: 1.23e-1000%',
@@ -598,7 +600,7 @@ QUnit.test('plotStats', function (assert) {
     var table0 = $('#table-0');
     var table2 = $("#table-2");
     table0.data('tableObj', fakeAnswer1);
-    table2.data('tableObj', fakeAnswer2);
+    table2.data('tableObj', fakeAnswer3);
 
     plotCurrentTables();
     assert.equal(graphDiv.data.length, 2, 'Setup has two traces in graph.');
@@ -621,10 +623,10 @@ QUnit.test('plotStats', function (assert) {
             "total": "64.00"
         },
         {
-            "header": "[3D6]",
-            "occurrences": "104.0",
-            "oneInChance": "2.077",
-            "pctChance": "48.15",
+            "header": "[-2, 3D6]",
+            "occurrences": "140.0",
+            "oneInChance": "1.543",
+            "pctChance": "64.81",
             "total": "216.0"
         }
     ];
@@ -636,7 +638,7 @@ QUnit.test('plotStats', function (assert) {
             "fill": "tozeroy",
             "fillcolor": "rgba(31,109,190,0.5)",
             "hoverinfo": "skip",
-            "legendgroup": "<DiceTable containing [3D4]>",
+            "legendgroup": "Die(4): 3",
             "mode": "none",
             "name": "[3D4]: [5to10]: 87.50%",
             "statsGroup": "stats-0",
@@ -671,9 +673,9 @@ QUnit.test('plotStats', function (assert) {
             "fill": "tozeroy",
             "fillcolor": "rgba(255,117,24,0.5)",
             "hoverinfo": "skip",
-            "legendgroup": "<DiceTable containing [3D6]>",
+            "legendgroup": "Modifier(-2): 1\nDie(6): 3",
             "mode": "none",
-            "name": "[3D6]: [5to10]: 48.15%",
+            "name": "[-2, 3D6]: [5to10]: 64.81%",
             "statsGroup": "stats-0",
             "type": "scatter",
             "x": [
@@ -687,18 +689,18 @@ QUnit.test('plotStats', function (assert) {
                 10.48
             ],
             "y": [
-                2.111111111111111,
-                2.7777777777777777,
-                4.62962962962963,
+                5.833333333333333,
                 6.944444444444444,
                 9.722222222222221,
                 11.574074074074073,
                 12.5,
-                12.5
+                12.5,
+                11.574074074074073,
+                10.685185185185183
             ]
         };
     for (key in expected3D6GraphData) {
-        assert.deepEqual(graphDiv.data[3][key], expected3D6GraphData[key], 'all parts but uid are equal. 3D6')
+        assert.deepEqual(graphDiv.data[3][key], expected3D6GraphData[key], 'all parts but uid are equal. [-2, 3D6]')
     }
 
     stats0.left.value = 6;
@@ -711,7 +713,7 @@ QUnit.test('plotStats', function (assert) {
         "fill": "tozeroy",
         "fillcolor": "rgba(31,109,190,0.5)",
         "hoverinfo": "skip",
-        "legendgroup": "<DiceTable containing [3D4]>",
+        "legendgroup": "Die(4): 3",
         "mode": "none",
         "name": "[3D4]: [6]: 15.63%",
         "statsGroup": "stats-0",
@@ -735,9 +737,9 @@ QUnit.test('plotStats', function (assert) {
         "fill": "tozeroy",
         "fillcolor": "rgba(255,117,24,0.5)",
         "hoverinfo": "skip",
-        "legendgroup": "<DiceTable containing [3D6]>",
+        "legendgroup": "Modifier(-2): 1\nDie(6): 3",
         "mode": "none",
-        "name": "[3D6]: [6]: 4.630%",
+        "name": "[-2, 3D6]: [6]: 9.722%",
         "statsGroup": "stats-0",
         "type": "scatter",
         "x": [
@@ -746,9 +748,9 @@ QUnit.test('plotStats', function (assert) {
             6.48
         ],
         "y": [
-            3.7407407407407405,
-            4.62962962962963,
-            5.7407407407407405
+            8.38888888888889,
+            9.722222222222221,
+            10.61111111111111
         ]
     };
     for (key in expected3D6GraphData) {
