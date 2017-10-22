@@ -6,7 +6,22 @@
     <script src="https://code.jquery.com/jquery-3.2.1.min.js"></script>
     <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
 
-    <script src="scripts/fakedata.js"></script>
+    <script src="scripts/jquery.mockjax.js"></script>
+    <script>
+        $.mockjax({
+            url: "for_index/_get_table",
+            response: function (settings) {
+                this.responseText = fakeList[parseInt(settings.data.requestStr) % fakeList.length];
+            }
+        });
+    </script>
+
+    <script type=text/javascript>
+        $SCRIPT_ROOT =  'for_index/';
+    </script>
+
+
+    <script src="tests/fakedata.js"></script>
 
     <script src="scripts/scinum.js"></script>
     <script src="scripts/statsmaker.js"></script>

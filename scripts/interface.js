@@ -22,8 +22,7 @@ function onPageLoad() {
     setUpHiddenForms(statRequestArea, allStatsForms);
     setUpHiddenForms(tableRequestArea, allTableForms);
 
-    var idStr = showHiddenForm(tableRequestArea);
-    getTable(document.getElementById(idStr));
+    showHiddenForm(tableRequestArea);
 
     showHiddenForm(statRequestArea);
 
@@ -47,10 +46,14 @@ function setUpHiddenForms(containerJQuery, classJQuery) {
 }
 
 function getTable(tableForm) {
-    var index = tableForm.tableQuery.value % fakeList.length;
-    $('#' + tableForm.id).data('tableObj', fakeList[index]);
-    plotCurrentTables();
-    resetStatsTable();
+    var requestStr = tableForm.tableQuery.value;
+    $.getJSON($SCRIPT_ROOT + '_get_table', {'requestStr': requestStr},
+        function (data) {
+            console.log(data);
+            $(tableForm).data('tableObj', data);
+            plotCurrentTables();
+            resetStatsTable();
+        });
 }
 
 function hideTableForm(idStr) {
