@@ -53,7 +53,14 @@ function getTable(tableForm) {
             $(tableForm).data('tableObj', data);
             plotCurrentTables();
             resetStatsTable();
-        });
+        }).fail(function( jqXHR) {
+        console.log(jqXHR);
+        var errorJson = jqXHR.responseJSON;
+        alert(
+            jqXHR.status + ': ' + jqXHR.statusText + '\n' +
+            'error type: ' + errorJson.type + '\ndetails: ' + errorJson.error
+        );
+    });
 }
 
 function hideTableForm(idStr) {

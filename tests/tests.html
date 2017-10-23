@@ -11,7 +11,17 @@
         $.mockjax({
             url: "for_test/_get_table",
             response: function (settings) {
-                this.responseText = fakeList[parseInt(settings.data.requestStr)];
+                var request = settings.data.requestStr;
+                if (isNaN(request)) {
+                    this.status = 400;
+                    this.statusText = 'BAD REQUEST';
+                    this.responseText = {
+                        'error': 'you done fucked up good.',
+                        'type': 'royalFuckUp'
+                    }
+                } else {
+                    this.responseText = fakeList[parseInt(settings.data.requestStr)];
+                }
             }
         });
     </script>

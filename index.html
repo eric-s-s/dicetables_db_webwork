@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <title>Write messages to the devtool console</title>
+    <title>Test Website</title>
     <meta charset="utf-8"/>
     <script src="https://code.jquery.com/jquery-3.2.1.min.js"></script>
     <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
@@ -11,7 +11,17 @@
         $.mockjax({
             url: "for_index/_get_table",
             response: function (settings) {
-                this.responseText = fakeList[parseInt(settings.data.requestStr) % fakeList.length];
+                var request = settings.data.requestStr;
+                if (isNaN(request)) {
+                    this.status = 400;
+                    this.statusText = 'BAD REQUEST';
+                    this.responseText = {
+                        'error': 'you done fucked up good.',
+                        'type': 'royalFuckUp'
+                    }
+                } else {
+                    this.responseText = fakeList[parseInt(settings.data.requestStr)];
+                }
             }
         });
     </script>
